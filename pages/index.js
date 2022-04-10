@@ -1,15 +1,36 @@
 import { useEffect, useState, useRef } from "react";
 import Head from "next/head";
-import { Global, css } from "@emotion/react";
+import { Global, css, keyframes } from "@emotion/react";
+import { SVG, Polygon } from "@svgdotjs/svg.js";
 import { styled } from "@mui/material/styles";
 import debounce from "lodash/debounce";
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import memoize from "lodash/memoize";
 import Link from "next/link";
+import Box from "@mui/material/Box";
 import A from "@mui/material/Link";
 
 const Img = styled("img")``;
+
+const circleAnimation = keyframes`
+  0% {
+    opacity: 0
+  }
+  3% {
+    opacity: 0.3
+  }
+  6% {
+    opacity: 0
+  }
+  9% {
+    opacity: 0.6
+  }
+  15% {
+    opacity: 0
+  }
+  100% {
+    opacity: 1
+  }
+`;
 
 const backgroundSize = {
   width: 2300,
@@ -26,6 +47,12 @@ const jingleSize = {
 const logoPosition = {
   left: (backgroundSize.width - logoSize.width) / 2,
   top: 707,
+};
+const circleRelativeOffsets = {
+  left: 77 / 751,
+  top: 40 / 651,
+  right: 90 / 751,
+  width: 19 / 751,
 };
 
 const backgroundRatio = backgroundSize.width / backgroundSize.height;
@@ -51,7 +78,19 @@ function getLogoRect(windowSize) {
       top: logoPosition.top * resize,
     };
 
-    return { ...resizedLogoSize, ...resizedLogoPosition };
+    const circleLeft = circleRelativeOffsets.left * resizedLogoSize.width;
+    const circleTop = circleRelativeOffsets.top * resizedLogoSize.height;
+    const circleRight = circleRelativeOffsets.right * resizedLogoSize.width;
+    const circleWidth = circleRelativeOffsets.width * resizedLogoSize.width;
+
+    return {
+      ...resizedLogoSize,
+      ...resizedLogoPosition,
+      circleLeft,
+      circleTop,
+      circleRight,
+      circleWidth,
+    };
   } else {
     const resize = windowSize.width / backgroundSize.width;
 
@@ -70,11 +109,23 @@ function getLogoRect(windowSize) {
         (resizedBackgroundSize.height - windowSize.height) / 2,
     };
 
+    const circleLeft = circleRelativeOffsets.left * resizedLogoSize.width;
+    const circleTop = circleRelativeOffsets.top * resizedLogoSize.height;
+    const circleRight = circleRelativeOffsets.right * resizedLogoSize.width;
+    const circleWidth = circleRelativeOffsets.width * resizedLogoSize.width;
+
     if (resizedLogoPosition.top + resizedLogoSize.height > windowSize.height) {
       resizedLogoSize.height = windowSize.height - resizedLogoPosition.top;
     }
 
-    return { ...resizedLogoSize, ...resizedLogoPosition };
+    return {
+      ...resizedLogoSize,
+      ...resizedLogoPosition,
+      circleLeft,
+      circleTop,
+      circleRight,
+      circleWidth,
+    };
   }
 }
 
@@ -88,13 +139,77 @@ function getJingleRect(windowSize, logoRect) {
   return { width, height, top, left };
 }
 
+const calculateCirclePoints = memoize(
+  (size, width = 8, x = 0, y = 0) => {
+    const pointsCount = 100;
+    const radius = size / 2;
+    const innerRadius = radius - width;
+    const pointAngle = 360 / pointsCount;
+
+    let outerPoints = [];
+    let innerPoints = [];
+
+    for (let i = 0, j = pointsCount; i <= pointsCount; i++, j--) {
+      const outerAngle = (pointAngle * i * Math.PI) / 180;
+      const outerX = radius * Math.sin(outerAngle) + radius + x;
+      const outerY = radius * Math.cos(outerAngle) + radius + y;
+
+      const innerAngle = (pointAngle * j * Math.PI) / 180;
+      const innerX = innerRadius * Math.sin(innerAngle) + radius + x;
+      const innerY = innerRadius * Math.cos(outerAngle) + radius + y;
+
+      outerPoints.push([outerX, outerY]);
+      innerPoints.push([innerX, innerY]);
+    }
+
+    return [...outerPoints, ...innerPoints];
+  },
+  (size, width, x, y) => `${size}-${width}-${x}-${y}`
+);
+
 export default function Home() {
   const logoRef = useRef(null);
   const jingleRef = useRef(null);
+  const circleRef = useRef(null);
 
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    const canvas = SVG().addTo(circleRef.current).size("100%", "100%");
+
+    const shine = new Polygon().fill("#ffffff");
+    canvas.add(shine);
+
+    const circle = new Polygon().fill("#ffffff").css("filter", "blur(8px)");
+    canvas.add(circle);
+
+    function drawLogo(logoRect) {
+      logoRef.current.style.width = `${logoRect.width}px`;
+      logoRef.current.style.height = `${logoRect.height}px`;
+      logoRef.current.style.left = `${logoRect.left}px`;
+      logoRef.current.style.top = `${logoRect.top}px`;
+    }
+
+    function drawJingle(jingleRect) {
+      jingleRef.current.style.width = `${jingleRect.width}px`;
+      jingleRef.current.style.height = `${jingleRect.height}px`;
+      jingleRef.current.style.left = `${jingleRect.left}px`;
+      jingleRef.current.style.top = `${jingleRect.top}px`;
+    }
+
+    function drawCircle(logoRect) {
+      const size = logoRect.width - logoRect.circleLeft - logoRect.circleRight;
+      const points = calculateCirclePoints(
+        size,
+        logoRect.circleWidth,
+        logoRect.circleLeft,
+        logoRect.circleTop
+      );
+
+      circle.plot(points);
+      shine.plot(points);
+    }
+
     function draw() {
       const windowSize = {
         width: document.documentElement.clientWidth,
@@ -104,15 +219,9 @@ export default function Home() {
       const logoRect = getLogoRect(windowSize);
       const jingleRect = getJingleRect(windowSize, logoRect);
 
-      logoRef.current.style.width = `${logoRect.width}px`;
-      logoRef.current.style.height = `${logoRect.height}px`;
-      logoRef.current.style.left = `${logoRect.left}px`;
-      logoRef.current.style.top = `${logoRect.top}px`;
-
-      jingleRef.current.style.width = `${jingleRect.width}px`;
-      jingleRef.current.style.height = `${jingleRect.height}px`;
-      jingleRef.current.style.left = `${jingleRect.left}px`;
-      jingleRef.current.style.top = `${jingleRect.top}px`;
+      drawLogo(logoRect);
+      drawJingle(jingleRect);
+      drawCircle(logoRect);
 
       setVisible(true);
     }
@@ -123,7 +232,10 @@ export default function Home() {
 
     window.addEventListener("resize", redraw);
 
-    return () => window.removeEventListener("resize", redraw);
+    return () => {
+      canvas.remove();
+      window.removeEventListener("resize", redraw);
+    };
   }, [setVisible]);
 
   return (
@@ -157,7 +269,14 @@ export default function Home() {
             y: 0,
           }}
         >
-          &nbsp;
+          <Box
+            ref={circleRef}
+            sx={{
+              animation: `${circleAnimation} 2s ease-out 1s forwards`,
+              opacity: 0,
+              height: "100%",
+            }}
+          />
         </A>
       </Link>
       <Link href="/catalog" passHref>
@@ -186,16 +305,3 @@ export default function Home() {
     </>
   );
 }
-
-// <Typography
-//   variant="h4"
-//   sx={{
-//     textTransform: "uppercase",
-//     color: "text.primary",
-//     fontWeight: "bold",
-//     letterSpacing: 3,
-//     animation: "neonAnimation 1s infinite",
-//   }}
-// >
-//   посмотреть
-// </Typography>

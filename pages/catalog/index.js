@@ -1,19 +1,45 @@
+import Link from "next/link";
 import { useRef, useEffect } from "react";
-import { Global, css } from "@emotion/react";
+import { Global, css, keyframes } from "@emotion/react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import Menu from "../../components/menu";
 import A from "@mui/material/Link";
-import { SVG, Rect, Polygon, Gradient } from "@svgdotjs/svg.js";
 import { styled, useTheme } from "@mui/material/styles";
 import debounce from "lodash/debounce";
 import memoize from "lodash/memoize";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import {
+  SVG,
+  Rect,
+  Polygon,
+  Gradient,
+  Circle as SvgCircle,
+} from "@svgdotjs/svg.js";
 
 const items = [
-  { id: "scrub", title: "scrub" },
-  { id: "oil", title: "dry oil" },
-  { id: "balm", title: "lip balm" },
+  {
+    id: "balm",
+    title: "lip balm",
+    from: "#0642ff",
+    to: "#59fca6",
+    delay: "1s",
+  },
+  {
+    id: "oil",
+    title: "dry oil",
+    from: "#4874ff",
+    to: "#ff00ff",
+    delay: "1.25s",
+  },
+  {
+    id: "scrub",
+    title: "scrub",
+    from: "#59fca6",
+    to: "#cc09e0",
+    delay: "1.5s",
+  },
 ];
 
 const Img = styled("img")``;
@@ -33,6 +59,7 @@ export default function Catalog() {
           }
         `}
       />
+      <Menu selected="/catalog" />
       <Box
         sx={{
           display: "flex",
@@ -40,7 +67,7 @@ export default function Catalog() {
             sm: "100vw",
           },
           height: {
-            sm: "100vh",
+            sm: "calc(100vh - 100px)",
           },
           alignItems: {
             sm: "center",
@@ -77,71 +104,82 @@ export default function Catalog() {
   );
 }
 
-function CatalogItem({ id, title }) {
+function CatalogItem({ id, title, from, to, delay }) {
   return (
-    <A
-      key={id}
-      href={`/catalog/${id}`}
-      underline="none"
-      sx={{
-        flexGrow: 1,
-        flexShrink: 1,
-        maxWidth: {
-          xs: 300,
-          sm: "initial",
-        },
-        width: {
-          xs: "100%",
-          sm: "30%",
-        },
-        display: "block",
-        position: "relative",
-        "& .circle, & .underline, & .title": {
-          opacity: 0.7,
-          transition: "opacity 0.2s ease-out",
-        },
-        "&:hover .circle, &:hover .underline, &:hover .title": {
-          opacity: 1,
-        },
-      }}
-    >
-      <Underline />
-      <Typography
-        className="title"
-        textAlign="center"
-        variant="h4"
+    <Link href={`/catalog/${id}`} passHref>
+      <A
+        underline="none"
         sx={{
-          color: "common.white",
-          textShadow: "0 0 6px #fff",
-          mb: {
-            xs: 6,
-            md: 9,
-            lg: 12,
+          flexGrow: 1,
+          flexShrink: 1,
+          maxWidth: {
+            xs: 300,
+            sm: "initial",
           },
-        }}
-      >
-        {title}
-      </Typography>
-      <Box
-        sx={{
+          width: {
+            xs: "100%",
+            sm: "30%",
+          },
+          display: "block",
           position: "relative",
-          padding: {
-            xs: 4,
-            md: 5,
+          "& .circle, & .underline, & .title": {
+            opacity: 0.7,
+            transition: "opacity 0.2s ease-out",
+          },
+          "&:hover .circle, &:hover .underline, &:hover .title": {
+            opacity: 1,
+          },
+          "& .image": {
+            transition: "transform 0.2s ease-out",
+            transform: "translate3d(0)",
+          },
+          "&:hover .image": {
+            transform: "scale(1.01)",
           },
         }}
       >
-        <Circle />
-        <Img
-          src={`/images/${id}.png`}
+        <Underline />
+        <Typography
+          className="title"
+          textAlign="center"
+          variant="h4"
           sx={{
-            pointerEvents: "none",
-            display: "block",
-            maxWidth: "100%",
+            color: "common.white",
+            textShadow: "0 0 6px #fff",
+            mb: {
+              xs: 6,
+              md: 9,
+              lg: 12,
+            },
           }}
-        />
-      </Box>
-    </A>
+        >
+          {title}
+        </Typography>
+        <Box
+          sx={{
+            position: "relative",
+            padding: {
+              xs: 4,
+              md: 5,
+            },
+          }}
+        >
+          <Circle from={from} to={to} />
+          <Img
+            className="image"
+            src={`/images/${id}.png`}
+            alt={title}
+            sx={{
+              position: "relative",
+              pointerEvents: "none",
+              display: "block",
+              maxWidth: "100%",
+              zIndex: 1,
+            }}
+          />
+        </Box>
+      </A>
+    </Link>
   );
 }
 
@@ -173,7 +211,7 @@ const calculateCirclePoints = memoize(
   (size, width, offset) => `${size}-${width}-${offset}`
 );
 
-function Circle() {
+function Circle({ from, to, delay }) {
   const theme = useTheme();
   const isLarge = useMediaQuery(theme.breakpoints.up("md"));
   const containerRef = useRef();
@@ -182,7 +220,7 @@ function Circle() {
   const circleOffset = 19;
   const glowWidth = circleWidth * 2;
   const glowOffset = circleOffset - (glowWidth - circleWidth) / 2;
-  const blur = isLarge ? 9 : 5;
+  const blur = isLarge ? 8 : 5;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -190,8 +228,8 @@ function Circle() {
     const canvas = SVG().addTo(containerRef.current).size("100%", "100%");
 
     const gradient = new Gradient("linear");
-    gradient.stop(0, "#5688ff");
-    gradient.stop(1, "#ff00ff");
+    gradient.stop(0, from);
+    gradient.stop(1, to);
     canvas.add(gradient);
 
     const glow = new Polygon().fill(gradient).css("filter", `blur(${blur}px)`);
@@ -200,8 +238,19 @@ function Circle() {
     const circle = new Polygon().fill("#ffffff");
     canvas.add(circle);
 
+    const inner = new SvgCircle()
+      .fill(gradient)
+      .css("filter", `blur(${blur}px)`);
+    canvas.add(inner);
+
     function draw() {
       const size = containerRef.current.offsetWidth;
+      const center = size / 2;
+      const offset =
+        parseInt(
+          getComputedStyle(containerRef.current.parentElement).paddingLeft
+        ) - 5;
+
       const circlePoints = calculateCirclePoints(
         size,
         circleWidth,
@@ -211,6 +260,8 @@ function Circle() {
 
       glow.plot(glowPoints);
       circle.plot(circlePoints);
+
+      inner.radius(center - offset).move(offset, offset);
     }
 
     draw();
@@ -222,14 +273,7 @@ function Circle() {
       canvas.remove();
       window.removeEventListener("resize", debouncedDraw);
     };
-  }, [
-    containerRef.current,
-    circleWidth,
-    circleOffset,
-    glowWidth,
-    glowOffset,
-    blur,
-  ]);
+  }, [circleWidth, circleOffset, glowWidth, glowOffset, blur, from, to]);
 
   return (
     <Box
@@ -237,6 +281,7 @@ function Circle() {
       ref={containerRef}
       sx={{
         position: "absolute",
+        zIndex: 0,
         left: 0,
         top: 0,
         width: "100%",
@@ -325,7 +370,7 @@ function Underline() {
       canvas.remove();
       window.removeEventListener("resize", debouncedDraw);
     };
-  }, [containerRef.current]);
+  }, []);
 
   return (
     <Box
