@@ -8,6 +8,9 @@ import memoize from "lodash/memoize";
 import Link from "next/link";
 import Box from "@mui/material/Box";
 import A from "@mui/material/Link";
+import { sessionOptions } from "../constants";
+import { withIronSessionSsr } from "iron-session/next";
+import cart from "../middleware/cart";
 
 const Img = styled("img")``;
 
@@ -242,11 +245,6 @@ export default function Home() {
     <>
       <Global
         styles={css`
-          html {
-            background: url(/images/home_background.jpg) no-repeat center center
-              fixed;
-            background-size: cover;
-          }
           body {
             background-color: transparent;
           }
@@ -257,51 +255,63 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
-      <Link href="/catalog" passHref>
-        <A
-          ref={logoRef}
-          underline="none"
-          sx={{
-            position: "absolute",
-            width: 0,
-            height: 0,
-            x: 0,
-            y: 0,
-          }}
-        >
-          <Box
-            ref={circleRef}
+      <Box
+        sx={{
+          width: "100vw",
+          height: "100vh",
+          background:
+            "url(/images/home_background.jpg) no-repeat center center fixed",
+          backgroundSize: "cover",
+        }}
+      >
+        <Link href="/catalog" passHref>
+          <A
+            ref={logoRef}
+            underline="none"
             sx={{
-              animation: `${circleAnimation} 2s ease-out 1s forwards`,
-              opacity: 0,
-              height: "100%",
+              position: "absolute",
+              width: 0,
+              height: 0,
+              x: 0,
+              y: 0,
             }}
-          />
-        </A>
-      </Link>
-      <Link href="/catalog" passHref>
-        <A
-          ref={jingleRef}
-          underline="none"
-          sx={{
-            position: "absolute",
-            width: 0,
-            height: 0,
-            x: 0,
-            y: 0,
-          }}
-        >
-          <Img
-            src="/images/jingle.png"
+          >
+            <Box
+              ref={circleRef}
+              sx={{
+                animation: `${circleAnimation} 2s ease-out 1s forwards`,
+                opacity: 0,
+                height: "100%",
+              }}
+            />
+          </A>
+        </Link>
+        <Link href="/catalog" passHref>
+          <A
+            ref={jingleRef}
+            underline="none"
             sx={{
-              transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(-10px)",
-              maxWidth: "100%",
+              position: "absolute",
+              width: 0,
+              height: 0,
+              x: 0,
+              y: 0,
             }}
-          />
-        </A>
-      </Link>
+          >
+            <Img
+              src="/images/jingle.png"
+              sx={{
+                transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
+                opacity: visible ? 1 : 0,
+                transform: visible ? "translateY(0)" : "translateY(-10px)",
+                maxWidth: "100%",
+              }}
+            />
+          </A>
+        </Link>
+      </Box>
     </>
   );
 }
+
+export const getServerSideProps = withIronSessionSsr(cart, sessionOptions);

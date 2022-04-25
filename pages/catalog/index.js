@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useRef, useEffect } from "react";
-import { Global, css, keyframes } from "@emotion/react";
+import { Global, css } from "@emotion/react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
@@ -10,41 +10,45 @@ import { styled, useTheme } from "@mui/material/styles";
 import debounce from "lodash/debounce";
 import memoize from "lodash/memoize";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { sessionOptions } from "../../constants";
+import { withIronSessionSsr } from "iron-session/next";
+import cart from "../../middleware/cart";
+import useCart from "../../hooks/useCart";
+import { titles, subtitles } from "../../constants";
 import {
   SVG,
   Rect,
+  Text,
   Polygon,
   Gradient,
   Circle as SvgCircle,
 } from "@svgdotjs/svg.js";
 
+const circleApproximation = 0.55191502449351;
+
 const items = [
   {
     id: "balm",
-    title: "lip balm",
     from: "#0642ff",
     to: "#59fca6",
-    delay: "1s",
   },
   {
     id: "oil",
-    title: "dry oil",
     from: "#4874ff",
     to: "#ff00ff",
-    delay: "1.25s",
   },
   {
     id: "scrub",
-    title: "scrub",
     from: "#59fca6",
     to: "#cc09e0",
-    delay: "1.5s",
   },
 ];
 
 const Img = styled("img")``;
 
-export default function Catalog() {
+export default function Catalog({ cart }) {
+  const { sum } = useCart(cart);
+
   return (
     <>
       <Global
@@ -59,7 +63,7 @@ export default function Catalog() {
           }
         `}
       />
-      <Menu selected="/catalog" />
+      <Menu selected="/catalog" sum={sum} />
       <Box
         sx={{
           display: "flex",
@@ -104,7 +108,7 @@ export default function Catalog() {
   );
 }
 
-function CatalogItem({ id, title, from, to, delay }) {
+function CatalogItem({ id, from, to }) {
   return (
     <Link href={`/catalog/${id}`} passHref>
       <A
@@ -122,6 +126,11 @@ function CatalogItem({ id, title, from, to, delay }) {
           },
           display: "block",
           position: "relative",
+          "& .subtitle": {
+            opacity: 0,
+            transform: "translateY(10px)",
+            transition: "all 0.2s ease-out",
+          },
           "& .circle, & .underline, & .title": {
             opacity: 0.7,
             transition: "opacity 0.2s ease-out",
@@ -134,7 +143,11 @@ function CatalogItem({ id, title, from, to, delay }) {
             transform: "translate3d(0)",
           },
           "&:hover .image": {
-            transform: "scale(1.01)",
+            transform: "scale(1.05)",
+          },
+          "&:hover .subtitle": {
+            opacity: 1,
+            transform: "translateY(0)",
           },
         }}
       >
@@ -146,14 +159,15 @@ function CatalogItem({ id, title, from, to, delay }) {
           sx={{
             color: "common.white",
             textShadow: "0 0 6px #fff",
+            textTransform: "uppercase",
             mb: {
-              xs: 6,
-              md: 9,
-              lg: 12,
+              xs: 3,
+              md: 6,
+              lg: 9,
             },
           }}
         >
-          {title}
+          {titles[id]}
         </Typography>
         <Box
           sx={{
@@ -165,10 +179,11 @@ function CatalogItem({ id, title, from, to, delay }) {
           }}
         >
           <Circle from={from} to={to} />
+          <Subtitle title={subtitles[id]} />
           <Img
             className="image"
             src={`/images/${id}.png`}
-            alt={title}
+            alt={titles[id]}
             sx={{
               position: "relative",
               pointerEvents: "none",
@@ -180,6 +195,77 @@ function CatalogItem({ id, title, from, to, delay }) {
         </Box>
       </A>
     </Link>
+  );
+}
+
+function calculateArcPoints(radius, offset) {
+  const control = radius * circleApproximation;
+  const points = [
+    `M${offset} ${offset + radius}`,
+    `C${offset} ${offset + radius - control}, ${
+      offset + radius - control
+    } ${offset}, ${offset + radius} ${offset}`,
+    `M${offset + radius} ${offset}`,
+    `C${offset + radius + control} ${offset}, ${offset + radius + radius} ${
+      offset + radius - control
+    }, ${offset + radius + radius} ${offset + radius}`,
+  ];
+
+  return points.join();
+}
+
+function Subtitle({ title }) {
+  const containerRef = useRef();
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const canvas = SVG().addTo(containerRef.current).size("100%", "100%");
+
+    const text = new Text().text(title).fill("#ffffff");
+    canvas.add(text);
+
+    const path = text.path();
+
+    function draw() {
+      const containerWidth = containerRef.current.offsetWidth;
+      const centerX = containerWidth / 2;
+      const offset = 14;
+      const radius = centerX - offset;
+      const length = (radius * 2 * Math.PI) / 2;
+
+      path
+        .plot(calculateArcPoints(150, 0))
+        .attr("x", (length - text.get(0).length()) / 2);
+
+      path.plot(calculateArcPoints(radius, offset));
+    }
+
+    draw();
+
+    const debouncedDraw = debounce(draw, 500);
+    window.addEventListener("resize", debouncedDraw);
+
+    return () => {
+      canvas.remove();
+      window.removeEventListener("resize", debouncedDraw);
+    };
+  }, []);
+
+  return (
+    <Box
+      className="subtitle"
+      ref={containerRef}
+      sx={{
+        position: "absolute",
+        zIndex: 0,
+        left: 0,
+        top: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+      }}
+    />
   );
 }
 
@@ -211,7 +297,7 @@ const calculateCirclePoints = memoize(
   (size, width, offset) => `${size}-${width}-${offset}`
 );
 
-function Circle({ from, to, delay }) {
+function Circle({ from, to }) {
   const theme = useTheme();
   const isLarge = useMediaQuery(theme.breakpoints.up("md"));
   const containerRef = useRef();
@@ -384,8 +470,10 @@ function Underline() {
         },
         left: 0,
         right: 0,
-        height: 40,
+        height: 39,
       }}
     />
   );
 }
+
+export const getServerSideProps = withIronSessionSsr(cart, sessionOptions);

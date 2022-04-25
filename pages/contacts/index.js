@@ -3,8 +3,14 @@ import Link from "@mui/material/Link";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Menu from "../../components/menu";
+import { sessionOptions } from "../../constants";
+import { withIronSessionSsr } from "iron-session/next";
+import cart from "../../middleware/cart";
+import useCart from "../../hooks/useCart";
 
-export default function About() {
+export default function About({ cart }) {
+  const { sum } = useCart(cart);
+
   return (
     <>
       <Global
@@ -19,7 +25,7 @@ export default function About() {
           }
         `}
       />
-      <Menu selected="/contacts" />
+      <Menu selected="/contacts" sum={sum} />
       <Container>
         <Typography align="center" sx={{ mt: 8, mb: 2 }}>
           Россия, г. Москва, г. Московский, ул. Академика Чумакова, д. 6, оф.
@@ -34,3 +40,5 @@ export default function About() {
     </>
   );
 }
+
+export const getServerSideProps = withIronSessionSsr(cart, sessionOptions);
