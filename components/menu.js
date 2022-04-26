@@ -1,10 +1,9 @@
 import A from "@mui/material/Link";
 import Link from "next/link";
-import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
-export default function Menu({ selected, sum = 0 }) {
+export default function Menu({ selected, cartMenuItemRef, sum = 0 }) {
   return (
     <Container
       sx={{
@@ -47,6 +46,7 @@ export default function Menu({ selected, sum = 0 }) {
         })}
         <Link href="/cart" passHref>
           <A
+            ref={cartMenuItemRef}
             underline="none"
             sx={{
               height: 100,

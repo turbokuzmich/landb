@@ -1,10 +1,15 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Global, css, keyframes } from "@emotion/react";
 import { styled, useTheme } from "@mui/material/styles";
+import Link from "next/link";
 import Menu from "./menu";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import Popper from "@mui/material/Popper";
+import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import memoize from "lodash/memoize";
 import debounce from "lodash/debounce";
@@ -35,9 +40,21 @@ export default function Item({
   colorStop,
   children,
 }) {
+  const cartMenuItemRef = useRef();
+
   const { sum, itemStatus, addToCart } = useCart(cart);
 
+  const [isCartDialogOpen, setIsCartDialogOpen] = useState(false);
+
   const add = () => addToCart(id);
+
+  const close = () => setIsCartDialogOpen(false);
+
+  useEffect(() => {
+    if (itemStatus[id] === "success") {
+      setIsCartDialogOpen(true);
+    }
+  }, [itemStatus[id], setIsCartDialogOpen]);
 
   return (
     <>
@@ -60,7 +77,79 @@ export default function Item({
           }
         `}
       />
-      <Menu selected="/catalog" sum={sum} />
+      <Menu selected="/catalog" sum={sum} cartMenuItemRef={cartMenuItemRef} />
+      <Popper
+        open={isCartDialogOpen}
+        anchorEl={cartMenuItemRef.current}
+        placement="bottom-end"
+        keepMounted
+      >
+        <IconButton
+          onClick={close}
+          size="small"
+          sx={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            zIndex: 1,
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+        <Paper
+          elevation={2}
+          sx={{
+            position: "relative",
+            width: 250,
+          }}
+        >
+          <Typography
+            variant="h6"
+            textAlign="center"
+            sx={{
+              p: 4,
+              borderBottom: "solid 1px #757575",
+            }}
+          >
+            Товар добавлен
+          </Typography>
+          <Box
+            sx={{
+              p: 4,
+              textTransform: "uppercase",
+            }}
+          >
+            <Box
+              sx={{
+                mb: 2,
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography>итого</Typography>
+              <Typography sx={{ fontWeight: "bold" }}>{sum}₽</Typography>
+            </Box>
+            <Link href="/cart" passHref>
+              <Button
+                variant="outlined"
+                size="large"
+                sx={{
+                  width: "100%",
+                  color: "#ffffff",
+                  borderColor: "#ffffff",
+                  backgroundColor: "rgba(255, 255, 255, 0)",
+                  "&:hover": {
+                    borderColor: "#ffffff",
+                    backgroundColor: "rgba(255, 255, 255, 0.08)",
+                  },
+                }}
+              >
+                Купить
+              </Button>
+            </Link>
+          </Box>
+        </Paper>
+      </Popper>
       <Container
         sx={{
           pt: {
