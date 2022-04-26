@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { Global, css } from "@emotion/react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -31,16 +31,19 @@ const items = [
     id: "balm",
     from: "#0642ff",
     to: "#59fca6",
+    glow: "#59fca6",
   },
   {
     id: "oil",
     from: "#4874ff",
     to: "#ff00ff",
+    glow: "#4874ff",
   },
   {
     id: "scrub",
     from: "#59fca6",
     to: "#cc09e0",
+    glow: "#cc09e0",
   },
 ];
 
@@ -108,11 +111,19 @@ export default function Catalog({ cart }) {
   );
 }
 
-function CatalogItem({ id, from, to }) {
+function CatalogItem({ id, from, to, glow }) {
+  const [isHover, setIsHover] = useState(false);
+
+  const onMouseEnter = useCallback(() => setIsHover(true), [setIsHover]);
+
+  const onMouseLeave = useCallback(() => setIsHover(false), [setIsHover]);
+
   return (
     <Link href={`/catalog/${id}`} passHref>
       <A
         underline="none"
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         sx={{
           flexGrow: 1,
           flexShrink: 1,
@@ -131,11 +142,11 @@ function CatalogItem({ id, from, to }) {
             transform: "translateY(10px)",
             transition: "all 0.2s ease-out",
           },
-          "& .circle, & .underline, & .title": {
+          "& .circle, & .title": {
             opacity: 0.7,
             transition: "opacity 0.2s ease-out",
           },
-          "&:hover .circle, &:hover .underline, &:hover .title": {
+          "&:hover .circle, &:hover .title": {
             opacity: 1,
           },
           "& .image": {
@@ -151,7 +162,7 @@ function CatalogItem({ id, from, to }) {
           },
         }}
       >
-        <Underline />
+        <Underline glow={glow} hover={isHover} />
         <Typography
           className="title"
           textAlign="center"
@@ -378,73 +389,54 @@ function Circle({ from, to }) {
   );
 }
 
-function Underline() {
+function Underline({ glow, hover = false }) {
   const containerRef = useRef();
+  const glowRectRef = useRef();
+  const baseRectRef = useRef();
+
+  const glowOffsets = {
+    left: 10,
+    top: 14,
+  };
+  const baseOffsets = {
+    left: 18,
+    top: 19,
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const canvas = SVG().addTo(containerRef.current).size("100%", "100%");
 
-    const horizontalOffset = 40;
-    const rect1Offset = 11;
-    const rect2Offset = rect1Offset + 6;
-    const rect3Offset = rect2Offset + 1;
-    const rect4Offset = rect3Offset + 1;
+    const glowRect = new Rect();
+    glowRectRef.current = glowRect;
+    canvas.add(glowRect);
 
-    const rect1Background = "#29d5f4";
-    const rect2Background = "#2ae9f4";
-    const rect3Background = "#ffffff";
-
-    const rect1 = new Rect();
-    canvas.add(rect1);
-
-    const rect2 = new Rect();
-    canvas.add(rect2);
-
-    const rect3 = new Rect();
-    canvas.add(rect3);
-
-    const rect4 = new Rect();
-    canvas.add(rect4);
+    const baseRect = new Rect();
+    baseRectRef.current = baseRect;
+    canvas.add(baseRect);
 
     function draw() {
       const width = containerRef.current.offsetWidth;
       const height = containerRef.current.offsetHeight;
 
-      rect1
-        .x(rect1Offset + horizontalOffset)
-        .y(rect1Offset)
-        .width(width - horizontalOffset * 2 - rect1Offset * 2)
-        .height(height - rect1Offset * 2)
-        .fill(rect1Background)
-        .radius((height - rect1Offset * 2) / 2)
-        .opacity(0.8)
-        .css("filter", "blur(3px)");
+      glowRect
+        .x(glowOffsets.left)
+        .y(glowOffsets.top)
+        .width(0)
+        .height(height - glowOffsets.top * 2)
+        .fill(glow)
+        .radius((height - glowOffsets.top * 2) / 2)
+        .css("filter", "blur(3px)")
+        .opacity(0);
 
-      rect2
-        .x(rect2Offset + horizontalOffset)
-        .y(rect2Offset)
-        .width(width - horizontalOffset * 2 - rect2Offset * 2)
-        .height(height - rect2Offset * 2)
-        .fill(rect1Background)
-        .radius((height - rect2Offset * 2) / 2);
-
-      rect3
-        .x(rect3Offset + horizontalOffset)
-        .y(rect3Offset)
-        .width(width - horizontalOffset * 2 - rect3Offset * 2)
-        .height(height - rect3Offset * 2)
-        .fill(rect2Background)
-        .radius((height - rect3Offset * 2) / 2);
-
-      rect4
-        .x(rect4Offset + horizontalOffset)
-        .y(rect4Offset)
-        .width(width - horizontalOffset * 2 - rect4Offset * 2)
-        .height(height - rect4Offset * 2)
-        .fill(rect3Background)
-        .radius((height - rect4Offset * 2) / 2);
+      baseRect
+        .x(baseOffsets.left)
+        .y(baseOffsets.top)
+        .width(0)
+        .height(height - baseOffsets.top * 2)
+        .fill("rgba(255, 255, 255, 0.5")
+        .opacity(0);
     }
 
     draw();
@@ -458,19 +450,42 @@ function Underline() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!(glowRectRef.current && baseRectRef.current)) {
+      return;
+    }
+
+    const width = containerRef.current.offsetWidth;
+    const height = containerRef.current.offsetHeight;
+
+    if (hover) {
+      glowRectRef.current
+        .animate(200, 0, "now")
+        .opacity(1)
+        .width(width - glowOffsets.left * 2);
+      baseRectRef.current
+        .animate(200, 0, "now")
+        .opacity(0.8)
+        .width(width - baseOffsets.left * 2);
+    } else {
+      glowRectRef.current.animate(200, 0, "now").opacity(0).width(0);
+      baseRectRef.current.animate(200, 0, "now").opacity(0).width(0);
+    }
+  }, [hover]);
+
   return (
     <Box
-      className="underline"
       ref={containerRef}
       sx={{
         position: "absolute",
+        pointerEvents: "none",
         top: {
           xs: 35,
           md: 45,
         },
         left: 0,
         right: 0,
-        height: 39,
+        height: 40,
       }}
     />
   );
