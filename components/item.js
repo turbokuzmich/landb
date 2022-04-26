@@ -3,6 +3,7 @@ import { Global, css, keyframes } from "@emotion/react";
 import { styled, useTheme } from "@mui/material/styles";
 import Link from "next/link";
 import Menu from "./menu";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -78,78 +79,80 @@ export default function Item({
         `}
       />
       <Menu selected="/catalog" sum={sum} cartMenuItemRef={cartMenuItemRef} />
-      <Popper
-        open={isCartDialogOpen}
-        anchorEl={cartMenuItemRef.current}
-        placement="bottom-end"
-        keepMounted
-      >
-        <IconButton
-          onClick={close}
-          size="small"
-          sx={{
-            position: "absolute",
-            right: 0,
-            top: 0,
-            zIndex: 1,
-          }}
+      <ClickAwayListener onClickAway={close}>
+        <Popper
+          open={isCartDialogOpen}
+          anchorEl={cartMenuItemRef.current}
+          placement="bottom-end"
+          keepMounted
         >
-          <CloseIcon />
-        </IconButton>
-        <Paper
-          elevation={2}
-          sx={{
-            position: "relative",
-            width: 250,
-          }}
-        >
-          <Typography
-            variant="h6"
-            textAlign="center"
+          <IconButton
+            onClick={close}
+            size="small"
             sx={{
-              p: 4,
-              borderBottom: "solid 1px #757575",
+              position: "absolute",
+              right: 0,
+              top: 0,
+              zIndex: 1,
             }}
           >
-            Товар добавлен
-          </Typography>
-          <Box
+            <CloseIcon />
+          </IconButton>
+          <Paper
+            elevation={2}
             sx={{
-              p: 4,
-              textTransform: "uppercase",
+              position: "relative",
+              width: 250,
             }}
           >
-            <Box
+            <Typography
+              variant="h6"
+              textAlign="center"
               sx={{
-                mb: 2,
-                display: "flex",
-                justifyContent: "space-between",
+                p: 4,
+                borderBottom: "solid 1px #757575",
               }}
             >
-              <Typography>итого</Typography>
-              <Typography sx={{ fontWeight: "bold" }}>{sum}₽</Typography>
-            </Box>
-            <Link href="/cart" passHref>
-              <Button
-                variant="outlined"
-                size="large"
+              Товар добавлен
+            </Typography>
+            <Box
+              sx={{
+                p: 4,
+                textTransform: "uppercase",
+              }}
+            >
+              <Box
                 sx={{
-                  width: "100%",
-                  color: "#ffffff",
-                  borderColor: "#ffffff",
-                  backgroundColor: "rgba(255, 255, 255, 0)",
-                  "&:hover": {
-                    borderColor: "#ffffff",
-                    backgroundColor: "rgba(255, 255, 255, 0.08)",
-                  },
+                  mb: 2,
+                  display: "flex",
+                  justifyContent: "space-between",
                 }}
               >
-                Купить
-              </Button>
-            </Link>
-          </Box>
-        </Paper>
-      </Popper>
+                <Typography>итого</Typography>
+                <Typography sx={{ fontWeight: "bold" }}>{sum}₽</Typography>
+              </Box>
+              <Link href="/cart" passHref>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  sx={{
+                    width: "100%",
+                    color: "#ffffff",
+                    borderColor: "#ffffff",
+                    backgroundColor: "rgba(255, 255, 255, 0)",
+                    "&:hover": {
+                      borderColor: "#ffffff",
+                      backgroundColor: "rgba(255, 255, 255, 0.08)",
+                    },
+                  }}
+                >
+                  Купить
+                </Button>
+              </Link>
+            </Box>
+          </Paper>
+        </Popper>
+      </ClickAwayListener>
       <Container
         sx={{
           pt: {
