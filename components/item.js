@@ -1,16 +1,15 @@
 import { useRef, useEffect, useState } from "react";
-import { Global, css, keyframes } from "@emotion/react";
+import { keyframes } from "@emotion/react";
 import { styled, useTheme } from "@mui/material/styles";
-import Link from "next/link";
 import Menu from "./menu";
+import Layout from "./layout";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
 import Popper from "@mui/material/Popper";
-import Paper from "@mui/material/Paper";
+import Price from "./price";
 import Box from "@mui/material/Box";
 import memoize from "lodash/memoize";
 import debounce from "lodash/debounce";
@@ -58,99 +57,80 @@ export default function Item({
   }, [itemStatus[id], setIsCartDialogOpen]);
 
   return (
-    <>
-      <Global
-        styles={css`
-          html {
-            background-image: linear-gradient(
-                rgba(0, 0, 0, 0),
-                rgba(0, 0, 0, 0.8),
-                rgba(0, 0, 0, 0)
-              ),
-              url(/images/catalog_background.jpg);
-            background-repeat: no-repeat, no-repeat;
-            background-position: center center, center center;
-            background-attachment: fixed, fixed;
-            background-size: cover, cover;
-          }
-          body {
-            background-color: transparent;
-          }
-        `}
-      />
+    <Layout>
       <Menu selected="/catalog" sum={sum} cartMenuItemRef={cartMenuItemRef} />
       <ClickAwayListener onClickAway={close}>
         <Popper
           open={isCartDialogOpen}
           anchorEl={cartMenuItemRef.current}
           placement="bottom-end"
+          modifiers={[
+            {
+              name: "offset",
+              options: {
+                offset: [16, -76],
+              },
+            },
+          ]}
           keepMounted
         >
-          <IconButton
-            onClick={close}
-            size="small"
+          <Box
             sx={{
-              position: "absolute",
-              right: 0,
-              top: 0,
-              zIndex: 1,
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-          <Paper
-            elevation={2}
-            sx={{
-              position: "relative",
-              width: 250,
+              width: 350,
+              display: "flex",
+              justifyContent: "end",
             }}
           >
             <Typography
-              variant="h6"
-              textAlign="center"
               sx={{
-                p: 4,
-                borderBottom: "solid 1px #757575",
+                fontSize: {
+                  xs: "18px",
+                  sm: "20px",
+                },
+                pr: 2,
+                pl: 2,
+                borderTop: "solid 1px rgba(255, 255, 255, 0.5)",
+                backgroundColor: "grey.900",
+                lineHeight: "50px",
+                color: "#ffffff",
+                display: "flex",
+                alignItems: "center",
               }}
             >
-              Товар добавлен
+              <ShoppingCartIcon sx={{ mr: "6px" }} />
+              <Price sum={sum} />
             </Typography>
-            <Box
+          </Box>
+          <Box
+            sx={{
+              backgroundColor: "grey.900",
+              display: "flex",
+              flexDirection: "column",
+              p: 2,
+              gap: 2,
+              width: 350,
+            }}
+          >
+            <Button
+              onClick={close}
+              variant="outlined"
+              size="large"
               sx={{
-                p: 4,
-                textTransform: "uppercase",
+                color: "#ffffff",
+                borderColor: "#ffffff",
+                backgroundColor: "rgba(255, 255, 255, 0)",
+                "&:hover": {
+                  borderColor: "#ffffff",
+                  backgroundColor: "rgba(255, 255, 255, 0.08)",
+                },
               }}
             >
-              <Box
-                sx={{
-                  mb: 2,
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Typography>итого</Typography>
-                <Typography sx={{ fontWeight: "bold" }}>{sum}₽</Typography>
-              </Box>
-              <Link href="/cart" passHref>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  sx={{
-                    width: "100%",
-                    color: "#ffffff",
-                    borderColor: "#ffffff",
-                    backgroundColor: "rgba(255, 255, 255, 0)",
-                    "&:hover": {
-                      borderColor: "#ffffff",
-                      backgroundColor: "rgba(255, 255, 255, 0.08)",
-                    },
-                  }}
-                >
-                  Купить
-                </Button>
-              </Link>
-            </Box>
-          </Paper>
+              Продолжить покупки
+            </Button>
+            <Button href="/cart" variant="contained" size="large">
+              Заказать доставку
+            </Button>
+          </Box>
         </Popper>
       </ClickAwayListener>
       <Container
@@ -260,7 +240,9 @@ export default function Item({
                 alignItems: "center",
               }}
             >
-              <Typography variant="h4">{prices[id]} ₽</Typography>
+              <Typography variant="h4">
+                <Price sum={prices[id]} />
+              </Typography>
               <Button
                 onClick={add}
                 variant="outlined"
@@ -294,7 +276,7 @@ export default function Item({
           {children}
         </Typography>
       </Container>
-    </>
+    </Layout>
   );
 }
 

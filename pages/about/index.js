@@ -1,6 +1,6 @@
-import { Global, css } from "@emotion/react";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
+import Layout from "../../components/layout";
 import Menu from "../../components/menu";
 import { sessionOptions } from "../../constants";
 import { withIronSessionSsr } from "iron-session/next";
@@ -11,19 +11,7 @@ export default function About({ cart }) {
   const { sum } = useCart(cart);
 
   return (
-    <>
-      <Global
-        styles={css`
-          html {
-            background: url(/images/catalog_background.jpg) no-repeat center
-              center fixed;
-            background-size: cover;
-          }
-          body {
-            background-color: transparent;
-          }
-        `}
-      />
+    <Layout>
       <Menu selected="/about" sum={sum} />
       <Container
         sx={{
@@ -71,7 +59,7 @@ export default function About({ cart }) {
         </Paragraph>
         <Paragraph>С&nbsp;уважением, команда DeluxSPA.</Paragraph>
       </Container>
-    </>
+    </Layout>
   );
 }
 

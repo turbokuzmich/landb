@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useRef, useEffect, useState, useCallback } from "react";
-import { Global, css } from "@emotion/react";
 import Box from "@mui/material/Box";
+import Layout from "../../components/layout";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Menu from "../../components/menu";
@@ -53,19 +53,7 @@ export default function Catalog({ cart }) {
   const { sum } = useCart(cart);
 
   return (
-    <>
-      <Global
-        styles={css`
-          html {
-            background: url(/images/catalog_background.jpg) no-repeat center
-              center fixed;
-            background-size: cover;
-          }
-          body {
-            background-color: transparent;
-          }
-        `}
-      />
+    <Layout>
       <Menu selected="/catalog" sum={sum} />
       <Box
         sx={{
@@ -107,7 +95,7 @@ export default function Catalog({ cart }) {
           ))}
         </Container>
       </Box>
-    </>
+    </Layout>
   );
 }
 
@@ -395,11 +383,11 @@ function Underline({ glow, hover = false }) {
   const baseRectRef = useRef();
 
   const glowOffsets = {
-    left: 10,
+    left: 40,
     top: 14,
   };
   const baseOffsets = {
-    left: 18,
+    left: 48,
     top: 19,
   };
 

@@ -1,6 +1,6 @@
-import { Global, css } from "@emotion/react";
 import Link from "@mui/material/Link";
 import Container from "@mui/material/Container";
+import Layout from "../../components/layout";
 import Typography from "@mui/material/Typography";
 import Menu from "../../components/menu";
 import { sessionOptions } from "../../constants";
@@ -12,19 +12,7 @@ export default function About({ cart }) {
   const { sum } = useCart(cart);
 
   return (
-    <>
-      <Global
-        styles={css`
-          html {
-            background: url(/images/catalog_background.jpg) no-repeat center
-              center fixed;
-            background-size: cover;
-          }
-          body {
-            background-color: transparent;
-          }
-        `}
-      />
+    <Layout>
       <Menu selected="/contacts" sum={sum} />
       <Container>
         <Typography align="center" sx={{ mt: 8, mb: 2 }}>
@@ -37,7 +25,7 @@ export default function About({ cart }) {
           <Link href="tel:+79263853751">+7 (926) 385 3751</Link>
         </Typography>
       </Container>
-    </>
+    </Layout>
   );
 }
 

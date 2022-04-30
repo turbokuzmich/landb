@@ -1,6 +1,7 @@
 import A from "@mui/material/Link";
 import Link from "next/link";
 import Container from "@mui/material/Container";
+import Price from "./price";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 export default function Menu({ selected, cartMenuItemRef, sum = 0 }) {
@@ -65,8 +66,8 @@ export default function Menu({ selected, cartMenuItemRef, sum = 0 }) {
               },
             }}
           >
-            <ShoppingCartIcon sx={{ mr: "4px" }} />
-            {sum} ₽
+            <ShoppingCartIcon sx={{ mr: "6px" }} />
+            <Price sum={sum} />
           </A>
         </Link>
       </>

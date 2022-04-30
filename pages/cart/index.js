@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
-import { Global, css } from "@emotion/react";
 import Box from "@mui/material/Box";
+import Layout from "../../components/layout";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -113,19 +113,7 @@ export default function Cart(props) {
   }, [items]);
 
   return (
-    <>
-      <Global
-        styles={css`
-          html {
-            background: url(/images/catalog_background.jpg) no-repeat center
-              center fixed;
-            background-size: cover;
-          }
-          body {
-            background-color: transparent;
-          }
-        `}
-      />
+    <Layout>
       <Menu selected="/cart" sum={sum} />
       <Container sx={{ mt: 8, mb: 2 }}>
         {idsInCart.length === 0 ? (
@@ -141,7 +129,7 @@ export default function Cart(props) {
           />
         )}
       </Container>
-    </>
+    </Layout>
   );
 }
 

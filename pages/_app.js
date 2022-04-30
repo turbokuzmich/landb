@@ -14,6 +14,10 @@ const theme = responsiveFontSizes(
       background: {
         default: "#001331",
       },
+      primary: {
+        main: "rgba(255, 255, 255, 0.8)",
+        dark: "rgba(255, 255, 255, 1)",
+      },
     },
     typography: {
       fontFamily: '"Evolventa", sans-serif',
