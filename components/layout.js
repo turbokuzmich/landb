@@ -13,8 +13,7 @@ export default function Layout({ children }) {
       />
       <Box
         sx={{
-          width: "100vw",
-          height: "100vh",
+          minHeight: "100vh",
           backgroundImage:
             "linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0)), url(/images/catalog_background.jpg)",
           backgroundRepeat: "no-repeat, no-repeat",

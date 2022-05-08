@@ -29,6 +29,10 @@ async function update(req, res) {
 
   Object.assign(cart, req.body);
 
+  req.session.cart = cart;
+
+  await req.session.save();
+
   res.status(200).json(cart);
 }
 

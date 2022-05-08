@@ -2,83 +2,38 @@ import { useCallback, useMemo, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Layout from "../../components/layout";
 import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "../../components/menu";
 import A from "@mui/material/Link";
 import Link from "next/link";
-import { items as ids, prices, titles, sessionOptions } from "../../constants";
+import Price from "../../components/price";
 import { withIronSessionSsr } from "iron-session/next";
 import { Formik, Field, Form } from "formik";
 import { TextField } from "formik-material-ui";
 import cart from "../../middleware/cart";
 import useCart from "../../hooks/useCart";
 import debounce from "lodash/debounce";
-import property from "lodash/property";
 import useCheckout from "../../hooks/useCheckout";
-import * as yup from "yup";
 import { styled } from "@mui/material/styles";
+import { cartSchema } from "../../helpers/validation";
+import { deliveryTypes } from "../../helpers/cart";
+import {
+  items as ids,
+  prices,
+  titles,
+  subtitles,
+  sessionOptions,
+} from "../../constants";
 
 const Img = styled("img")``;
 
-const paymentTypes = [
-  {
-    value: "cash",
-    label: "Наличными",
-  },
-  {
-    value: "card",
-    label: "Картой онлайн",
-  },
-];
-
-const deliveryTypes = [
-  {
-    value: "pickpoint",
-    label: "PickPoint",
-  },
-  {
-    value: "Boxberry",
-    label: "boxberry",
-  },
-  {
-    value: "sdek",
-    label: "СДЭК",
-  },
-];
-
-const schema = yup.object().shape({
-  fio: yup
-    .string()
-    .trim()
-    .min(2, "Пожалуйста, укажите ФИО")
-    .required("Пожалуйста, укажите ФИО"),
-  email: yup
-    .string()
-    .email("Пожалуйста, укажите правильный адрес электронной почты")
-    .required("Пожалуйста, укажите адрес электронной почты"),
-  pay: yup
-    .mixed()
-    .oneOf(
-      paymentTypes.map(property("value")),
-      "Пожалуйста, выберите тип оплаты"
-    )
-    .required("Пожалуйста, выберите тип оплаты"),
-  delivery: yup
-    .mixed()
-    .oneOf(
-      deliveryTypes.map(property("value")),
-      "Пожалуйста, выберите тип доставки"
-    )
-    .required("Пожалуйста, выберите тип доставки"),
-});
-
 const initialFormValues = {
+  phone: "",
   fio: "",
+  address: "",
   email: "",
-  pay: "cash",
-  delivery: "pickup",
+  delivery: "pickpoint",
 };
 
 export default function Cart(props) {
@@ -115,26 +70,24 @@ export default function Cart(props) {
   return (
     <Layout>
       <Menu selected="/cart" sum={sum} />
-      <Container sx={{ mt: 8, mb: 2 }}>
-        {idsInCart.length === 0 ? (
-          <Typography textAlign="center">В корзине пусто</Typography>
-        ) : (
-          <FullCart
-            ids={idsInCart}
-            items={itemsCopy}
-            sum={sum}
-            itemStatus={itemStatus}
-            deleteFromCart={deleteFromCart}
-            updateCart={updateCart}
-          />
-        )}
-      </Container>
+      {idsInCart.length === 0 ? (
+        <Typography textAlign="center">В корзине пусто</Typography>
+      ) : (
+        <FullCart
+          ids={idsInCart}
+          items={itemsCopy}
+          sum={sum}
+          itemStatus={itemStatus}
+          deleteFromCart={deleteFromCart}
+          updateCart={updateCart}
+        />
+      )}
     </Layout>
   );
 }
 
 function FullCart({ ids, items, sum, itemStatus, updateCart, deleteFromCart }) {
-  const { checkout } = useCheckout();
+  const { state, checkout } = useCheckout(updateCart);
 
   const callbacks = useMemo(
     () =>
@@ -159,242 +112,405 @@ function FullCart({ ids, items, sum, itemStatus, updateCart, deleteFromCart }) {
   );
 
   return (
+    <CartContainer>
+      {["initial", "checkout"].includes(state) ? (
+        <>
+          <CartItemsContainer>
+            {ids.map((id) => (
+              <CartItem
+                key={id}
+                id={id}
+                items={items}
+                itemStatus={itemStatus}
+                callbacks={callbacks}
+              />
+            ))}
+            <Typography textAlign="right" variant="h5">
+              Итого: <Price sum={sum} />
+            </Typography>
+          </CartItemsContainer>
+          <Box sx={{ width: "700px" }}>
+            <Typography variant="h5" textAlign="center" sx={{ mb: 2 }}>
+              Доставка
+            </Typography>
+            <Typography
+              textAlign="center"
+              sx={{
+                display: sum >= 1500 ? "none" : "block",
+              }}
+            >
+              Стоимость доставки по Москве и МО — <Price sum={150} />. В регионы
+              — <Price sum={300} />.<br />
+              При заказе от <Price sum={1500} /> доставка бесплатна.
+            </Typography>
+            <Formik
+              initialValues={initialFormValues}
+              validationSchema={cartSchema}
+              onSubmit={checkout}
+            >
+              {({ isSubmitting }) => (
+                <Form autoComplete="off" noValidate>
+                  <Field
+                    component={TextField}
+                    name="phone"
+                    label="Телефон"
+                    variant="outlined"
+                    autoComplete="off"
+                    margin="normal"
+                    fullWidth
+                    required
+                  />
+                  <Field
+                    component={TextField}
+                    name="delivery"
+                    label="Тип доставки"
+                    variant="outlined"
+                    autoComplete="off"
+                    margin="normal"
+                    fullWidth
+                    required
+                    select
+                  >
+                    {deliveryTypes.map((option) => (
+                      <MenuItem key={option.label} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Field>
+                  <Field
+                    component={TextField}
+                    name="address"
+                    label="Адрес доставки"
+                    variant="outlined"
+                    autoComplete="off"
+                    margin="normal"
+                    fullWidth
+                    required
+                  />
+                  <Field
+                    component={TextField}
+                    name="fio"
+                    label="ФИО"
+                    variant="outlined"
+                    autoComplete="off"
+                    margin="normal"
+                    fullWidth
+                    required
+                  />
+                  <Field
+                    component={TextField}
+                    name="email"
+                    label="Почта"
+                    variant="outlined"
+                    autoComplete="off"
+                    margin="normal"
+                    fullWidth
+                  />
+                  <Button
+                    type="submit"
+                    size="large"
+                    variant="outlined"
+                    disabled={isSubmitting}
+                    sx={{
+                      mt: 2,
+                      color: "text.primary",
+                      borderColor: "text.secondary",
+                      backgroundColor: "rgba(255, 255, 255, 0)",
+                      "&:hover": {
+                        borderColor: "text.primary",
+                        backgroundColor: "rgba(255, 255, 255, 0.08)",
+                      },
+                    }}
+                  >
+                    Заказать
+                  </Button>
+                </Form>
+              )}
+            </Formik>
+          </Box>
+        </>
+      ) : (
+        <Typography textAlign="center">
+          Заказ оформлен. В ближайшее время мы свяжемся с Вами.
+        </Typography>
+      )}
+    </CartContainer>
+  );
+}
+
+export const getServerSideProps = withIronSessionSsr(cart, sessionOptions);
+
+function CartItem({ id, items, callbacks }) {
+  return (
     <Box
+      key={id}
       sx={{
         display: "flex",
+        position: "relative",
         gap: 4,
+        pb: 4,
+        "&::after": {
+          background:
+            "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%)",
+          position: "absolute",
+          content: "''",
+          bottom: 0,
+          height: "1px",
+          left: 0,
+          right: 0,
+        },
       }}
     >
       <Box
         sx={{
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          flexGrow: 1,
-          flexShrink: 1,
-          gap: 4,
+          width: "150px",
+          flexGrow: 0,
+          flexShrink: 0,
         }}
       >
-        {ids.map((id) => (
-          <Box key={id} sx={{ display: "flex", gap: 4 }}>
-            <Box
+        <Link href={`/catalog/${id}`} passHref>
+          <A
+            sx={{
+              "& .image": {
+                transition: "filter 0.2s ease-out",
+                filter: "drop-shadow(0 0 4px rgba(255, 255, 255, 0))",
+              },
+              "&:hover .image": {
+                filter: "drop-shadow(0 0 4px rgba(255, 255, 255, 1))",
+              },
+            }}
+          >
+            <Img
+              className="image"
+              src={`/images/${id}.png`}
+              alt={titles[id]}
               sx={{
-                width: "150px",
-                flexGrow: 0,
-                flexShrink: 0,
+                position: "relative",
+                pointerEvents: "none",
+                display: "block",
+                maxWidth: "100%",
+              }}
+            />
+          </A>
+        </Link>
+      </Box>
+      <Box
+        sx={{
+          pt: 1,
+          pb: 1,
+          flexGrow: 1,
+          flexShrink: 0,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <Box>
+          <Link href={`/catalog/${id}`} passHref>
+            <A
+              variant="h6"
+              color="text.primary"
+              sx={{
+                lineHeight: 1.2,
+                textTransform: "uppercase",
+                textDecorationColor: "rgba(255, 255, 255, 0.4)",
               }}
             >
-              <Link href={`/catalog/${id}`} passHref>
-                <A>
-                  <Img
-                    className="image"
-                    src={`/images/${id}.png`}
-                    alt={titles[id]}
-                    sx={{
-                      position: "relative",
-                      pointerEvents: "none",
-                      display: "block",
-                      maxWidth: "100%",
-                    }}
-                  />
-                </A>
-              </Link>
-            </Box>
-            <Box
-              sx={{
-                flexGrow: 1,
-                flexShrink: 0,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-              }}
-            >
-              <Typography paragraph>
-                <Link href={`/catalog/${id}`} passHref>
-                  <A
-                    variant="h6"
-                    sx={{
-                      color: "text.primary",
-                      textDecorationColor: "rgba(255, 255, 255, 0.4)",
-                    }}
-                  >
-                    {titles[id]}
-                  </A>
-                </Link>
-              </Typography>
-              <Typography>
-                {prices[id]} ₽
-                <Box
-                  onClick={callbacks[id].del}
-                  component="span"
-                  sx={{
-                    ml: 1,
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    textDecorationColor: "rgba(255, 255, 255, 0.4)",
-                    textTransform: "uppercase",
-                    "&:hover": {
-                      textDecorationColor: "#ffffff",
-                    },
-                  }}
-                >
-                  удалить
-                </Box>
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "nowrap",
-                alignItems: "start",
-                pt: "46px",
-                userSelect: "none",
-              }}
-            >
-              <Button
-                variant="outlined"
-                disabled={items[id] === 1 || itemStatus[id] !== "initial"}
-                onClick={callbacks[id].dec}
-                sx={{
-                  color: "text.primary",
-                  borderColor: "text.secondary",
-                  backgroundColor: "rgba(255, 255, 255, 0)",
-                  display: "inline-block",
-                  fontSize: "1rem",
-                  height: "24px",
-                  lineHeight: "22px",
-                  padding: 0,
-                  "&:hover": {
-                    borderColor: "text.primary",
-                    backgroundColor: "rgba(255, 255, 255, 0.08)",
-                  },
-                }}
-              >
-                &ndash;
-              </Button>
-              <Box sx={{ minWidth: 28, textAlign: "center", ml: 1, mr: 1 }}>
-                {items[id]}
-              </Box>
-              <Button
-                variant="outlined"
-                disabled={itemStatus[id] !== "initial"}
-                onClick={callbacks[id].inc}
-                sx={{
-                  color: "text.primary",
-                  borderColor: "text.secondary",
-                  backgroundColor: "rgba(255, 255, 255, 0)",
-                  display: "inline-block",
-                  fontSize: "1rem",
-                  height: "24px",
-                  lineHeight: "22px",
-                  padding: 0,
-                  "&:hover": {
-                    borderColor: "text.primary",
-                    backgroundColor: "rgba(255, 255, 255, 0.08)",
-                  },
-                }}
-              >
-                +
-              </Button>
-            </Box>
-          </Box>
-        ))}
-        <Box sx={{ ml: "182px" }}>
-          <Typography variant="h5">{sum} ₽</Typography>
+              {titles[id]}
+            </A>
+          </Link>
+          <Typography variant="subtitle1" color="text.secondary">
+            {subtitles[id]}
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex" }}>
+          <CountSwitcher id={id} items={items} callbacks={callbacks} />
+          <Typography
+            sx={{
+              ml: "1em",
+              lineHeight: "31px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <Typography component="span" color="text.secondary">
+              x
+            </Typography>{" "}
+            <Price sum={prices[id]} />
+          </Typography>
         </Box>
       </Box>
       <Box
         sx={{
-          width: 400,
-          flexGrow: 0,
-          flexShrink: 0,
-          pt: "46px",
+          pt: 1,
+          pb: 1,
+          display: "flex",
+          alignItems: "end",
+          flexDirection: "column",
+          justifyContent: "space-between",
         }}
       >
-        <Formik
-          initialValues={initialFormValues}
-          validationSchema={schema}
-          onSubmit={checkout}
+        <Typography variant="h6">
+          <Price sum={items[id] * prices[id]} />
+        </Typography>
+        <Button
+          variant="outlined"
+          onClick={callbacks[id].del}
+          sx={{
+            color: "text.primary",
+            lineHeight: "29px",
+            p: "0 15px",
+            borderColor: "rgba(255, 255, 255, 0.3)",
+            backgroundColor: "rgba(255, 255, 255, 0)",
+            "&:hover": {
+              borderColor: "text.primary",
+              backgroundColor: "rgba(255, 255, 255, 0.08)",
+            },
+          }}
         >
-          {({ isSubmitting }) => (
-            <Form autoComplete="off" noValidate>
-              <Field
-                component={TextField}
-                name="fio"
-                label="ФИО"
-                variant="outlined"
-                autoComplete="off"
-                fullWidth
-                required
-              />
-              <Field
-                component={TextField}
-                name="email"
-                label="Почта"
-                variant="outlined"
-                autoComplete="off"
-                margin="normal"
-                fullWidth
-                required
-              />
-              <Field
-                component={TextField}
-                name="pay"
-                label="Тип оплаты"
-                variant="outlined"
-                autoComplete="off"
-                margin="normal"
-                fullWidth
-                required
-                select
-              >
-                {paymentTypes.map((option) => (
-                  <MenuItem key={option.label} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Field>
-              <Field
-                component={TextField}
-                name="delivery"
-                label="Тип доставки"
-                variant="outlined"
-                autoComplete="off"
-                margin="normal"
-                fullWidth
-                required
-                select
-              >
-                {deliveryTypes.map((option) => (
-                  <MenuItem key={option.label} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Field>
-              <Button
-                type="submit"
-                size="large"
-                variant="outlined"
-                disabled={isSubmitting}
-                sx={{
-                  mt: 2,
-                  color: "text.primary",
-                  borderColor: "text.secondary",
-                  backgroundColor: "rgba(255, 255, 255, 0)",
-                  "&:hover": {
-                    borderColor: "text.primary",
-                    backgroundColor: "rgba(255, 255, 255, 0.08)",
-                  },
-                }}
-              >
-                Заказать
-              </Button>
-            </Form>
-          )}
-        </Formik>
+          Удалить
+        </Button>
       </Box>
     </Box>
   );
 }
 
-export const getServerSideProps = withIronSessionSsr(cart, sessionOptions);
+function CountSwitcher({ id, items, callbacks }) {
+  const isLeftDisabled = items[id] === 1;
+
+  const [isLeftHovered, setIsLeftHovered] = useState(false);
+  const [isRightHovered, setIsRightHovered] = useState(false);
+
+  const onLeftMouseEnter = useCallback(
+    () => setIsLeftHovered(true),
+    [setIsLeftHovered]
+  );
+  const onLeftMouseLeave = useCallback(
+    () => setIsLeftHovered(false),
+    [setIsLeftHovered]
+  );
+  const onRightMouseEnter = useCallback(
+    () => setIsRightHovered(true),
+    [setIsRightHovered]
+  );
+  const onRightMouseLeave = useCallback(
+    () => setIsRightHovered(false),
+    [setIsRightHovered]
+  );
+
+  useEffect(() => {
+    if (isLeftHovered && items[id] === 1) {
+      setIsLeftHovered(false);
+    }
+  }, [items[id], isLeftHovered, setIsLeftHovered]);
+
+  const gradient = [
+    `rgba(255,255,255,${
+      isLeftDisabled ? "0.1" : isLeftHovered ? "1.0" : "0.4"
+    }) 0%`,
+    "rgba(255,255,255,0.5) 50%",
+    `rgba(255,255,255,${isRightHovered ? "1.0" : "0.4"}) 100%`,
+  ].join(", ");
+
+  return (
+    <Box
+      sx={{
+        display: "inline-flex",
+        position: "relative",
+        justifyContent: "start",
+      }}
+    >
+      <Box
+        sx={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          background: `linear-gradient(90deg, ${gradient})`,
+          mask: "url(/images/cart_button_mask.svg)",
+          p: "1px",
+        }}
+      />
+      <Button
+        disabled={isLeftDisabled}
+        onMouseEnter={onLeftMouseEnter}
+        onMouseLeave={onLeftMouseLeave}
+        onClick={callbacks[id].dec}
+        sx={{
+          p: 0,
+          pb: "3px",
+          fontSize: "1rem",
+          width: 32,
+          minWidth: 0,
+          "&:hover": {
+            backgroundColor: "transparent",
+          },
+        }}
+      >
+        &ndash;
+      </Button>
+      <Typography
+        sx={{
+          lineHeight: "31px",
+          width: 28,
+          textAlign: "center",
+          pointerEvents: "none",
+        }}
+      >
+        {items[id]}
+      </Typography>
+      <Button
+        onMouseEnter={onRightMouseEnter}
+        onMouseLeave={onRightMouseLeave}
+        onClick={callbacks[id].inc}
+        sx={{
+          p: 0,
+          pb: "3px",
+          fontSize: "1rem",
+          width: 32,
+          minWidth: 0,
+          "&:hover": {
+            backgroundColor: "transparent",
+          },
+        }}
+      >
+        +
+      </Button>
+    </Box>
+  );
+}
+
+function CartItemsContainer({ children }) {
+  return (
+    <Box
+      sx={{
+        width: "700px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 4,
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function CartContainer({ children }) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        flexDirection: "column",
+        gap: 4,
+        pt: {
+          xs: 2,
+          md: 8,
+        },
+        pb: 4,
+      }}
+    >
+      {children}
+    </Box>
+  );
+}

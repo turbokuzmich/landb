@@ -15,13 +15,20 @@ export default function About({ cart }) {
     <Layout>
       <Menu selected="/contacts" sum={sum} />
       <Container>
-        <Typography align="center" sx={{ mt: 8, mb: 2 }}>
+        <Typography align="center" gutterBottom>
           Россия, г. Москва, г. Московский, ул. Академика Чумакова, д. 6, оф.
           117
         </Typography>
-        <Typography align="center" gutterBottom>
+        <Typography
+          component="div"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 4,
+          }}
+        >
+          <Link href="mailto:info@landb.shop">info@landbshop</Link>
           <Link href="tel:+74956659015">+7 (495) 665 9015</Link>
-          <br />
           <Link href="tel:+79263853751">+7 (926) 385 3751</Link>
         </Typography>
       </Container>

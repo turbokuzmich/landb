@@ -4,6 +4,15 @@ import axios from "axios";
 
 // states: 'initial' | 'checkout' | 'success' | 'error'
 
+function reset(updateCart, setState) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      updateCart(ids.reduce((items, id) => ({ ...items, [id]: 0 }), {}));
+      setState("initial");
+    }, 3000);
+  });
+}
+
 export default function useCheckout(updateCart) {
   const [state, setState] = useState("initial");
 
@@ -11,14 +20,11 @@ export default function useCheckout(updateCart) {
     async function (form) {
       setState("checkout");
 
-      const { data: items } = await axios.put("/api/checkout", form);
+      await axios.put("/api/checkout", form);
 
       setState("success");
 
-      setTimeout(() => {
-        updateCart(ids.reduce((items, id) => ({ ...items, [id]: 0 }), {}));
-        setState("initial");
-      }, 3000);
+      await reset(updateCart, setState);
     },
     [state, setState]
   );
