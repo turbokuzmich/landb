@@ -60,7 +60,7 @@ export default function Cart(props) {
       setItemsCopy(items);
       updateCartDebounced(items);
     },
-    [itemsCopy, updateCartDebounced]
+    [setItemsCopy, updateCartDebounced]
   );
 
   useEffect(() => {
@@ -376,6 +376,7 @@ function CartItem({ id, items, callbacks }) {
 
 function CountSwitcher({ id, items, callbacks }) {
   const isLeftDisabled = items[id] === 1;
+  const qty = items[id];
 
   const [isLeftHovered, setIsLeftHovered] = useState(false);
   const [isRightHovered, setIsRightHovered] = useState(false);
@@ -401,7 +402,7 @@ function CountSwitcher({ id, items, callbacks }) {
     if (isLeftHovered && items[id] === 1) {
       setIsLeftHovered(false);
     }
-  }, [items[id], isLeftHovered, setIsLeftHovered]);
+  }, [qty, id, items, isLeftHovered, setIsLeftHovered]);
 
   const gradient = [
     `rgba(255,255,255,${

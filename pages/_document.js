@@ -24,13 +24,14 @@ export default class LnBDocument extends Document {
 
     ctx.renderPage = () =>
       originalRenderPage({
-        enhanceApp: (App) => (props) => {
-          return (
-            <CacheProvider value={cache}>
-              <App {...props} />
-            </CacheProvider>
-          );
-        },
+        enhanceApp: (App) =>
+          function EnhancedApp(props) {
+            return (
+              <CacheProvider value={cache}>
+                <App {...props} />
+              </CacheProvider>
+            );
+          },
       });
 
     const initialProps = await Document.getInitialProps(ctx);
