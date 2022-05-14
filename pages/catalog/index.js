@@ -15,6 +15,7 @@ import { withIronSessionSsr } from "iron-session/next";
 import cart from "../../middleware/cart";
 import useCart from "../../hooks/useCart";
 import { titles, subtitles } from "../../constants";
+import { isTouch as detectIsTouch } from "../../helpers/features";
 import {
   SVG,
   Rect,
@@ -51,8 +52,6 @@ const Img = styled("img")``;
 
 export default function Catalog({ cart }) {
   const { sum } = useCart(cart);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Layout>
@@ -93,7 +92,7 @@ export default function Catalog({ cart }) {
           }}
         >
           {items.map((item) => (
-            <CatalogItem key={item.id} isMobile={isMobile} {...item} />
+            <CatalogItem key={item.id} {...item} />
           ))}
         </Container>
       </Box>
@@ -101,21 +100,22 @@ export default function Catalog({ cart }) {
   );
 }
 
-function CatalogItem({ id, from, to, glow, isMobile }) {
+function CatalogItem({ id, from, to, glow }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const [isHover, setIsHover] = useState(false);
 
   const onMouseEnter = useCallback(() => setIsHover(true), [setIsHover]);
 
   const onMouseLeave = useCallback(() => setIsHover(false), [setIsHover]);
 
-  const props = {
-    underline: "none",
-    ...(isMobile ? {} : { onMouseEnter, onMouseLeave }),
-  };
-
   return (
     <Link href={`/catalog/${id}`} passHref>
       <A
+        underline="none"
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         sx={{
           flexGrow: 1,
           flexShrink: 1,
@@ -129,33 +129,34 @@ function CatalogItem({ id, from, to, glow, isMobile }) {
           },
           display: "block",
           position: "relative",
-          "& .subtitle": {
-            opacity: 0,
-            transform: "translateY(10px)",
-            transition: "all 0.2s ease-out",
-          },
-          "& .circle, & .title": {
-            opacity: 0.7,
-            transition: "opacity 0.2s ease-out",
-          },
-          "&:hover .circle, &:hover .title": {
-            opacity: 1,
-          },
-          "& .image": {
-            transition: "transform 0.2s ease-out",
-            transform: "translate3d(0)",
-          },
-          "&:hover .image": {
-            transform: "scale(1.05)",
-          },
-          "&:hover .subtitle": {
-            opacity: 1,
-            transform: "translateY(0)",
+          "@media (hover: hover)": {
+            "& .subtitle": {
+              opacity: 0,
+              transform: "translateY(10px)",
+              transition: "all 0.2s ease-out",
+            },
+            "&:hover .subtitle": {
+              opacity: 1,
+              transform: "translateY(0)",
+            },
+            "& .circle, & .title": {
+              opacity: 0.7,
+              transition: "opacity 0.2s ease-out",
+            },
+            "&:hover .circle, &:hover .title": {
+              opacity: 1,
+            },
+            "& .image": {
+              transition: "transform 0.2s ease-out",
+              transform: "translate3d(0)",
+            },
+            "&:hover .image": {
+              transform: "scale(1.05)",
+            },
           },
         }}
-        {...props}
       >
-        {isMobile ? null : <Underline glow={glow} hover={isHover} />}
+        <Underline glow={glow} hover={isHover} />
         <Typography
           className="title"
           textAlign="center"
@@ -397,7 +398,7 @@ function Underline({ glow, hover = false }) {
   };
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || detectIsTouch()) return;
 
     const canvas = SVG().addTo(containerRef.current).size("100%", "100%");
 
@@ -444,7 +445,7 @@ function Underline({ glow, hover = false }) {
   }, []);
 
   useEffect(() => {
-    if (!(glowRectRef.current && baseRectRef.current)) {
+    if (!glowRectRef.current || !baseRectRef.current || detectIsTouch()) {
       return;
     }
 

@@ -17,8 +17,7 @@ export default function Layout({ children }) {
           backgroundImage:
             "linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0)), url(/images/catalog_background.jpg)",
           backgroundRepeat: "no-repeat, no-repeat",
-          backgroundPosition: "center center, center center",
-          backgroundAttachment: "fixed, fixed",
+          backgroundPosition: "center top, center top",
           backgroundSize: "cover, cover",
         }}
       >
