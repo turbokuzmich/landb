@@ -174,6 +174,7 @@ export default function Home() {
   const logoRef = useRef(null);
   const jingleRef = useRef(null);
   const circleRef = useRef(null);
+  const backgroundRef = useRef(null);
 
   const [visible, setVisible] = useState(false);
 
@@ -213,6 +214,10 @@ export default function Home() {
       shine.plot(points);
     }
 
+    function drawBackground(windowSize) {
+      backgroundRef.current.style.height = windowSize.height;
+    }
+
     function draw() {
       const windowSize = {
         width: document.documentElement.offsetWidth,
@@ -222,6 +227,7 @@ export default function Home() {
       const logoRect = getLogoRect(windowSize);
       const jingleRect = getJingleRect(windowSize, logoRect);
 
+      drawBackground(windowSize);
       drawLogo(logoRect);
       drawJingle(jingleRect);
       drawCircle(logoRect);
@@ -257,19 +263,32 @@ export default function Home() {
       </Head>
       <Box
         sx={{
-          minHeight: "100vh",
+          height: "100vh",
           position: "relative",
-          background:
-            "url(/images/home_background.jpg) no-repeat center center fixed",
-          backgroundSize: "cover",
+          overflow: "hidden",
         }}
       >
+        <Box
+          ref={backgroundRef}
+          sx={{
+            position: "absolute",
+            height: "100vh",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1,
+            background:
+              "url(/images/home_background.jpg) no-repeat center center fixed",
+            backgroundSize: "cover",
+          }}
+        />
         <Link href="/catalog" passHref>
           <A
             ref={logoRef}
             underline="none"
             sx={{
               position: "absolute",
+              zIndex: 2,
               width: 0,
               height: 0,
               x: 0,
@@ -292,6 +311,7 @@ export default function Home() {
             underline="none"
             sx={{
               position: "absolute",
+              zIndex: 2,
               width: 0,
               height: 0,
               x: 0,
