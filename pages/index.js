@@ -215,7 +215,7 @@ export default function Home() {
     }
 
     function drawBackground(windowSize) {
-      backgroundRef.current.style.height = windowSize.height;
+      backgroundRef.current.style.height = `${windowSize.height}px`;
     }
 
     function draw() {
