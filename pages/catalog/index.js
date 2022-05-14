@@ -72,6 +72,10 @@ export default function Catalog({ cart }) {
             xs: 3,
             sm: "initial",
           },
+          pb: {
+            xs: 6,
+            sm: "initial",
+          },
         }}
       >
         <Container

@@ -42,6 +42,9 @@ export default function Item({
 }) {
   const cartMenuItemRef = useRef();
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const { sum, itemStatus, addToCart } = useCart(cart);
 
   const [isCartDialogOpen, setIsCartDialogOpen] = useState(false);
@@ -168,11 +171,15 @@ export default function Item({
         <Box
           sx={{
             display: "flex",
+            flexDirection: {
+              xs: "column",
+              sm: "row",
+            },
             gap: 4,
             alignItems: "center",
             maxWidth: 800,
             mb: {
-              xs: 0,
+              xs: 2,
               md: 4,
             },
           }}
@@ -203,6 +210,16 @@ export default function Item({
               width: 300,
             }}
           >
+            <CartBlock
+              id={id}
+              add={add}
+              itemStatus={itemStatus}
+              sx={{
+                justifyContent: "center",
+                display: isMobile ? "flex" : "none",
+                mb: 4,
+              }}
+            />
             <Typography variant="h6" paragraph>
               Состав:
             </Typography>
@@ -212,7 +229,10 @@ export default function Item({
                 listStyleType: "none",
                 listStylePosition: "outside",
                 pl: 0,
-                mb: 4,
+                mb: {
+                  xs: 0,
+                  sm: 4,
+                },
                 "& li": {
                   position: "relative",
                   "&:after": {
@@ -233,39 +253,22 @@ export default function Item({
                 </Typography>
               ))}
             </Typography>
-            <Box
+            <CartBlock
+              id={id}
+              add={add}
+              itemStatus={itemStatus}
               sx={{
-                gap: 2,
-                display: "flex",
-                alignItems: "center",
+                display: isMobile ? "none" : "flex",
               }}
-            >
-              <Typography variant="h4">
-                <Price sum={prices[id]} />
-              </Typography>
-              <Button
-                onClick={add}
-                variant="outlined"
-                size="large"
-                disabled={itemStatus[id] !== "initial"}
-                sx={{
-                  color: "#ffffff",
-                  borderColor: "#ffffff",
-                  backgroundColor: "rgba(255, 255, 255, 0)",
-                  "&:hover": {
-                    borderColor: "#ffffff",
-                    backgroundColor: "rgba(255, 255, 255, 0.08)",
-                  },
-                }}
-              >
-                {itemStatus[id] === "success" ? "Добавлено!" : "В корзину"}
-              </Button>
-            </Box>
+            />
           </Box>
         </Box>
         <Typography
           sx={{
-            textAlign: "center",
+            textAlign: {
+              xs: "left",
+              sm: "center",
+            },
             maxWidth: 800,
             mb: {
               xs: 2,
@@ -387,5 +390,39 @@ function Circle({ from, to }) {
         pointerEvents: "none",
       }}
     />
+  );
+}
+
+function CartBlock({ id, add, itemStatus, sx = {} }) {
+  return (
+    <Box
+      sx={{
+        gap: 2,
+        display: "flex",
+        alignItems: "center",
+        ...sx,
+      }}
+    >
+      <Typography variant="h4">
+        <Price sum={prices[id]} />
+      </Typography>
+      <Button
+        onClick={add}
+        variant="outlined"
+        size="large"
+        disabled={itemStatus[id] !== "initial"}
+        sx={{
+          color: "#ffffff",
+          borderColor: "#ffffff",
+          backgroundColor: "rgba(255, 255, 255, 0)",
+          "&:hover": {
+            borderColor: "#ffffff",
+            backgroundColor: "rgba(255, 255, 255, 0.08)",
+          },
+        }}
+      >
+        {itemStatus[id] === "success" ? "Добавлено!" : "В корзину"}
+      </Button>
+    </Box>
   );
 }
