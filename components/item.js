@@ -71,7 +71,7 @@ export default function Item({
             {
               name: "offset",
               options: {
-                offset: [16, -76],
+                offset: [16, isMobile ? -51 : -76],
               },
             },
           ]}
@@ -79,7 +79,10 @@ export default function Item({
         >
           <Box
             sx={{
-              width: 350,
+              width: {
+                xs: 300,
+                sm: 350,
+              },
               display: "flex",
               justifyContent: "end",
             }}
@@ -111,7 +114,10 @@ export default function Item({
               flexDirection: "column",
               p: 2,
               gap: 2,
-              width: 350,
+              width: {
+                sx: 300,
+                sm: 350,
+              },
             }}
           >
             <Button
