@@ -51,6 +51,8 @@ const Img = styled("img")``;
 
 export default function Catalog({ cart }) {
   const { sum } = useCart(cart);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Layout>
@@ -91,7 +93,7 @@ export default function Catalog({ cart }) {
           }}
         >
           {items.map((item) => (
-            <CatalogItem key={item.id} {...item} />
+            <CatalogItem key={item.id} isMobile={isMobile} {...item} />
           ))}
         </Container>
       </Box>
@@ -99,19 +101,21 @@ export default function Catalog({ cart }) {
   );
 }
 
-function CatalogItem({ id, from, to, glow }) {
+function CatalogItem({ id, from, to, glow, isMobile }) {
   const [isHover, setIsHover] = useState(false);
 
   const onMouseEnter = useCallback(() => setIsHover(true), [setIsHover]);
 
   const onMouseLeave = useCallback(() => setIsHover(false), [setIsHover]);
 
+  const props = {
+    underline: "none",
+    ...(isMobile ? {} : { onMouseEnter, onMouseLeave }),
+  };
+
   return (
     <Link href={`/catalog/${id}`} passHref>
       <A
-        underline="none"
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
         sx={{
           flexGrow: 1,
           flexShrink: 1,
@@ -149,8 +153,9 @@ function CatalogItem({ id, from, to, glow }) {
             transform: "translateY(0)",
           },
         }}
+        {...props}
       >
-        <Underline glow={glow} hover={isHover} />
+        {isMobile ? null : <Underline glow={glow} hover={isHover} />}
         <Typography
           className="title"
           textAlign="center"

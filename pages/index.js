@@ -174,7 +174,6 @@ export default function Home() {
   const logoRef = useRef(null);
   const jingleRef = useRef(null);
   const circleRef = useRef(null);
-  const containerRef = useRef(null);
 
   const [visible, setVisible] = useState(false);
 
@@ -216,8 +215,8 @@ export default function Home() {
 
     function draw() {
       const windowSize = {
-        width: containerRef.current.clientWidth,
-        height: containerRef.current.clientHeight,
+        width: document.documentElement.offsetWidth,
+        height: document.documentElement.offsetHeight,
       };
 
       const logoRect = getLogoRect(windowSize);
@@ -257,7 +256,6 @@ export default function Home() {
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
       <Box
-        ref={containerRef}
         sx={{
           minHeight: "100vh",
           position: "relative",

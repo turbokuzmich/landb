@@ -9,7 +9,10 @@ export default function Menu({ selected, cartMenuItemRef, sum = 0 }) {
     <Container
       sx={{
         display: "flex",
-        justifyContent: "center",
+        justifyContent: {
+          xs: "space-between",
+          sm: "center",
+        },
       }}
     >
       <>
@@ -25,6 +28,10 @@ export default function Menu({ selected, cartMenuItemRef, sum = 0 }) {
               <A
                 underline="none"
                 sx={{
+                  display: {
+                    xs: "none",
+                    sm: "initial",
+                  },
                   height: 100,
                   fontSize: {
                     xs: "18px",
