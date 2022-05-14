@@ -257,8 +257,8 @@ export default function Home() {
       </Head>
       <Box
         sx={{
-          width: "100vw",
           height: "100vh",
+          position: "relative",
           background:
             "url(/images/home_background.jpg) no-repeat center center fixed",
           backgroundSize: "cover",
