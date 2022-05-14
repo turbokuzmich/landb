@@ -277,8 +277,9 @@ export default function Home() {
             left: 0,
             right: 0,
             zIndex: 1,
-            background:
-              "url(/images/home_background.jpg) no-repeat center center fixed",
+            background: "red",
+            // background:
+            //   "url(/images/home_background.jpg) no-repeat center center fixed",
             backgroundSize: "cover",
           }}
         />
