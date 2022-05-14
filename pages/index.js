@@ -214,6 +214,7 @@ export default function Home() {
     }
 
     function draw() {
+      alert(`${document.documentElement.clientHeight}, ${document.documentElement.offsetHeight}`)
       const windowSize = {
         width: document.documentElement.offsetWidth,
         height: document.documentElement.offsetHeight,
