@@ -14,7 +14,15 @@ export default function About({ cart }) {
   return (
     <Layout>
       <Menu selected="/contacts" sum={sum} />
-      <Container>
+      <Container
+        sx={{
+          pt: {
+            xs: 2,
+            md: 8,
+          },
+          pb: 4,
+        }}
+      >
         <Typography align="center" gutterBottom>
           Россия, г. Москва, г. Московский, ул. Академика Чумакова, д. 6, оф.
           117
@@ -23,8 +31,16 @@ export default function About({ cart }) {
           component="div"
           sx={{
             display: "flex",
+            flexDirection: {
+              xs: "column",
+              md: "row",
+            },
             justifyContent: "center",
-            gap: 4,
+            alignItems: "center",
+            gap: {
+              xs: 1,
+              md: 4,
+            },
           }}
         >
           <Link href="mailto:info@landb.shop">info@landbshop</Link>

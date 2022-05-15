@@ -19,6 +19,7 @@ export default function About({ cart }) {
             xs: 2,
             md: 8,
           },
+          pb: 4,
         }}
       >
         <Paragraph>

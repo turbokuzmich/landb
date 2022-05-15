@@ -60,7 +60,16 @@ export default function LnBMenu({ selected, cartMenuItemRef, sum = 0 }) {
       }}
     >
       <>
-        <IconButton size="large" edge="start" onClick={handleClick}>
+        <IconButton
+          size="large"
+          edge="start"
+          onClick={handleClick}
+          sx={{
+            display: {
+              md: "none",
+            },
+          }}
+        >
           <MenuIcon />
         </IconButton>
         <Menu

@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Layout from "../../components/layout";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "../../components/menu";
 import A from "@mui/material/Link";
@@ -70,24 +71,28 @@ export default function Cart(props) {
   return (
     <Layout>
       <Menu selected="/cart" sum={sum} />
-      {idsInCart.length === 0 ? (
-        <Typography textAlign="center">В корзине пусто</Typography>
-      ) : (
-        <FullCart
-          ids={idsInCart}
-          items={itemsCopy}
-          sum={sum}
-          itemStatus={itemStatus}
-          deleteFromCart={deleteFromCart}
-          updateCart={updateCart}
-        />
-      )}
+      <Container maxWidth="md">
+        {idsInCart.length === 0 ? (
+          <Typography textAlign="center">В корзине пусто</Typography>
+        ) : (
+          <FullCart
+            ids={idsInCart}
+            items={itemsCopy}
+            sum={sum}
+            itemStatus={itemStatus}
+            deleteFromCart={deleteFromCart}
+            updateCart={updateCart}
+          />
+        )}
+      </Container>
     </Layout>
   );
 }
 
+export const getServerSideProps = withIronSessionSsr(cart, sessionOptions);
+
 function FullCart({ ids, items, sum, itemStatus, updateCart, deleteFromCart }) {
-  const { state, checkout } = useCheckout(updateCart);
+  const { state } = useCheckout(updateCart);
 
   const callbacks = useMemo(
     () =>
@@ -125,109 +130,11 @@ function FullCart({ ids, items, sum, itemStatus, updateCart, deleteFromCart }) {
                 callbacks={callbacks}
               />
             ))}
-            <Typography textAlign="right" variant="h5">
+            <Typography textAlign="right" variant="h5" sx={{ mt: 4 }}>
               Итого: <Price sum={sum} />
             </Typography>
           </CartItemsContainer>
-          <Box sx={{ width: "700px" }}>
-            <Typography variant="h5" textAlign="center" sx={{ mb: 2 }}>
-              Доставка
-            </Typography>
-            <Typography
-              textAlign="center"
-              sx={{
-                display: sum >= 1500 ? "none" : "block",
-              }}
-            >
-              Стоимость доставки по Москве и МО — <Price sum={150} />. В регионы
-              — <Price sum={300} />.<br />
-              При заказе от <Price sum={1500} /> доставка бесплатна.
-            </Typography>
-            <Formik
-              initialValues={initialFormValues}
-              validationSchema={cartSchema}
-              onSubmit={checkout}
-            >
-              {({ isSubmitting }) => (
-                <Form autoComplete="off" noValidate>
-                  <Field
-                    component={TextField}
-                    name="phone"
-                    label="Телефон"
-                    variant="outlined"
-                    autoComplete="off"
-                    margin="normal"
-                    fullWidth
-                    required
-                  />
-                  <Field
-                    component={TextField}
-                    name="delivery"
-                    label="Тип доставки"
-                    variant="outlined"
-                    autoComplete="off"
-                    margin="normal"
-                    fullWidth
-                    required
-                    select
-                  >
-                    {deliveryTypes.map((option) => (
-                      <MenuItem key={option.label} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Field>
-                  <Field
-                    component={TextField}
-                    name="address"
-                    label="Адрес доставки"
-                    variant="outlined"
-                    autoComplete="off"
-                    margin="normal"
-                    fullWidth
-                    required
-                  />
-                  <Field
-                    component={TextField}
-                    name="fio"
-                    label="ФИО"
-                    variant="outlined"
-                    autoComplete="off"
-                    margin="normal"
-                    fullWidth
-                    required
-                  />
-                  <Field
-                    component={TextField}
-                    name="email"
-                    label="Почта"
-                    variant="outlined"
-                    autoComplete="off"
-                    margin="normal"
-                    fullWidth
-                  />
-                  <Button
-                    type="submit"
-                    size="large"
-                    variant="outlined"
-                    disabled={isSubmitting}
-                    sx={{
-                      mt: 2,
-                      color: "text.primary",
-                      borderColor: "text.secondary",
-                      backgroundColor: "rgba(255, 255, 255, 0)",
-                      "&:hover": {
-                        borderColor: "text.primary",
-                        backgroundColor: "rgba(255, 255, 255, 0.08)",
-                      },
-                    }}
-                  >
-                    Заказать
-                  </Button>
-                </Form>
-              )}
-            </Formik>
-          </Box>
+          <CheckoutForm sum={sum} updateCart={updateCart} />
         </>
       ) : (
         <Typography textAlign="center">
@@ -238,13 +145,121 @@ function FullCart({ ids, items, sum, itemStatus, updateCart, deleteFromCart }) {
   );
 }
 
-export const getServerSideProps = withIronSessionSsr(cart, sessionOptions);
+function CheckoutForm({ sum, updateCart }) {
+  const { checkout } = useCheckout(updateCart);
+
+  return (
+    <Box sx={{ mt: 4 }}>
+      <Typography variant="h5" textAlign="center" sx={{ mb: 2 }}>
+        Доставка
+      </Typography>
+      <Typography
+        textAlign="center"
+        sx={{
+          display: sum >= 1500 ? "none" : "block",
+        }}
+      >
+        Стоимость доставки по Москве и МО — <Price sum={150} />. В регионы —{" "}
+        <Price sum={300} />.<br />
+        При заказе от <Price sum={1500} /> доставка бесплатна.
+      </Typography>
+      <Formik
+        initialValues={initialFormValues}
+        validationSchema={cartSchema}
+        onSubmit={checkout}
+      >
+        {({ isSubmitting }) => (
+          <Form autoComplete="off" noValidate>
+            <Field
+              component={TextField}
+              name="phone"
+              label="Телефон"
+              variant="outlined"
+              autoComplete="off"
+              margin="normal"
+              fullWidth
+              required
+            />
+            <Field
+              component={TextField}
+              name="delivery"
+              label="Тип доставки"
+              variant="outlined"
+              autoComplete="off"
+              margin="normal"
+              fullWidth
+              required
+              select
+            >
+              {deliveryTypes.map((option) => (
+                <MenuItem key={option.label} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Field>
+            <Field
+              component={TextField}
+              name="address"
+              label="Адрес доставки"
+              variant="outlined"
+              autoComplete="off"
+              margin="normal"
+              fullWidth
+              required
+            />
+            <Field
+              component={TextField}
+              name="fio"
+              label="ФИО"
+              variant="outlined"
+              autoComplete="off"
+              margin="normal"
+              fullWidth
+              required
+            />
+            <Field
+              component={TextField}
+              name="email"
+              label="Почта"
+              variant="outlined"
+              autoComplete="off"
+              margin="normal"
+              fullWidth
+            />
+            <Button
+              type="submit"
+              size="large"
+              variant="outlined"
+              disabled={isSubmitting}
+              sx={{
+                mt: 2,
+                color: "text.primary",
+                borderColor: "text.secondary",
+                backgroundColor: "rgba(255, 255, 255, 0)",
+                "&:hover": {
+                  borderColor: "text.primary",
+                  backgroundColor: "rgba(255, 255, 255, 0.08)",
+                },
+              }}
+            >
+              Заказать
+            </Button>
+          </Form>
+        )}
+      </Formik>
+    </Box>
+  );
+}
 
 function CartItem({ id, items, callbacks }) {
   return (
     <Box
       key={id}
       sx={{
+        height: {
+          xs: 150,
+          md: "auto",
+        },
         display: "flex",
         position: "relative",
         gap: 4,
@@ -263,6 +278,10 @@ function CartItem({ id, items, callbacks }) {
     >
       <Box
         sx={{
+          display: {
+            xs: "none",
+            sm: "flex",
+          },
           width: "150px",
           flexGrow: 0,
           flexShrink: 0,
@@ -296,8 +315,12 @@ function CartItem({ id, items, callbacks }) {
       </Box>
       <Box
         sx={{
-          pt: 1,
-          pb: 1,
+          pt: {
+            md: 1,
+          },
+          pb: {
+            md: 1,
+          },
           flexGrow: 1,
           flexShrink: 0,
           display: "flex",
@@ -341,8 +364,12 @@ function CartItem({ id, items, callbacks }) {
       </Box>
       <Box
         sx={{
-          pt: 1,
-          pb: 1,
+          pt: {
+            md: 1,
+          },
+          pb: {
+            md: 1,
+          },
           display: "flex",
           alignItems: "end",
           flexDirection: "column",
@@ -483,16 +510,12 @@ function CountSwitcher({ id, items, callbacks }) {
 
 function CartItemsContainer({ children }) {
   return (
-    <Box
-      sx={{
-        width: "700px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-      }}
-    >
+    <>
+      <Typography variant="h4" textAlign="center" sx={{ mb: 2 }}>
+        Корзина
+      </Typography>
       {children}
-    </Box>
+    </>
   );
 }
 
@@ -500,10 +523,6 @@ function CartContainer({ children }) {
   return (
     <Box
       sx={{
-        display: "flex",
-        alignItems: "center",
-        flexDirection: "column",
-        gap: 4,
         pt: {
           xs: 2,
           md: 8,
