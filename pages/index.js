@@ -257,9 +257,20 @@ export default function Home() {
         `}
       />
       <Head>
-        <title>LandB</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="viewport" content="initial-scale=1, width=device-width" />
+        <link rel="prefetch" href="/images/balm.png" />
+        <link rel="preload" href="/images/balm.png" as="image" />
+        <link rel="prefetch" href="/images/photo_balm.png" />
+        <link rel="preload" href="/images/photo_balm.png" as="image" />
+        <link rel="prefetch" href="/images/oil.png" />
+        <link rel="preload" href="/images/oil.png" as="image" />
+        <link rel="prefetch" href="/images/photo_oil.png" />
+        <link rel="preload" href="/images/photo_oil.png" as="image" />
+        <link rel="prefetch" href="/images/scrub.png" />
+        <link rel="preload" href="/images/scrub.png" as="image" />
+        <link rel="prefetch" href="/images/photo_scrub.png" />
+        <link rel="preload" href="/images/photo_scrub.png" as="image" />
+        <link rel="prefetch" href="/images/catalog_background.jpg" />
+        <link rel="preload" href="/images/catalog_background.jpg" as="image" />
       </Head>
       <Box
         sx={{

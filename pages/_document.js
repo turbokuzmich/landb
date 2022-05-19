@@ -8,7 +8,11 @@ export default class LnBDocument extends Document {
   render() {
     return (
       <Html>
-        <Head />
+        <Head>
+          <title>LandB</title>
+          <link rel="icon" href="/favicon.ico" />
+          <meta name="viewport" content="initial-scale=1, width=device-width" />
+        </Head>
         <body>
           <Main />
           <NextScript />

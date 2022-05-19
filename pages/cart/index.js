@@ -264,6 +264,7 @@ function CartItem({ id, items, callbacks }) {
         position: "relative",
         gap: 4,
         pb: 4,
+        pt: 4,
         "&::after": {
           background:
             "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%)",
@@ -301,7 +302,7 @@ function CartItem({ id, items, callbacks }) {
           >
             <Img
               className="image"
-              src={`/images/${id}.png`}
+              src={`/images/photo_${id}.png`}
               alt={titles[id]}
               sx={{
                 position: "relative",

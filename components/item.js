@@ -11,24 +11,9 @@ import Typography from "@mui/material/Typography";
 import Popper from "@mui/material/Popper";
 import Price from "./price";
 import Box from "@mui/material/Box";
-import memoize from "lodash/memoize";
-import debounce from "lodash/debounce";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { SVG, Polygon, Gradient, Circle as SvgCircle } from "@svgdotjs/svg.js";
 import { prices, titles, subtitles } from "../constants";
 import useCart from "../hooks/useCart";
-
-const circleAnimation = keyframes`
-  0% {
-    opacity: 0.7
-  }
-  50% {
-    opacity: 1
-  }
-  100% {
-    opacity: 0.7
-  }
-`;
 
 const Img = styled("img")``;
 
@@ -181,7 +166,7 @@ export default function Item({
               xs: "column",
               sm: "row",
             },
-            gap: 4,
+            gap: 8,
             alignItems: "center",
             maxWidth: 800,
             mb: {
@@ -193,14 +178,11 @@ export default function Item({
           <Box
             sx={{
               position: "relative",
-              width: "100%",
               lineHeight: 0,
-              p: 5,
             }}
           >
-            <Circle from={colorStart} to={colorStop} />
             <Img
-              src={`/images/${id}.png`}
+              src={`/images/photo_${id}.png`}
               sx={{
                 maxWidth: "100%",
                 pointerEvents: "none",
@@ -286,116 +268,6 @@ export default function Item({
         </Typography>
       </Container>
     </Layout>
-  );
-}
-
-const calculateCirclePoints = memoize(
-  (size, width = 8, offset = 0) => {
-    const pointsCount = 100;
-    const radius = size / 2 - offset;
-    const innerRadius = radius - width;
-    const pointAngle = 360 / pointsCount;
-
-    let outerPoints = [];
-    let innerPoints = [];
-
-    for (let i = 0, j = pointsCount; i <= pointsCount; i++, j--) {
-      const outerAngle = (pointAngle * i * Math.PI) / 180;
-      const outerX = radius * Math.sin(outerAngle) + radius + offset;
-      const outerY = radius * Math.cos(outerAngle) + radius + offset;
-
-      const innerAngle = (pointAngle * j * Math.PI) / 180;
-      const innerX = innerRadius * Math.sin(innerAngle) + radius + offset;
-      const innerY = innerRadius * Math.cos(outerAngle) + radius + offset;
-
-      outerPoints.push([outerX, outerY]);
-      innerPoints.push([innerX, innerY]);
-    }
-
-    return [...outerPoints, ...innerPoints];
-  },
-  (size, width, offset) => `${size}-${width}-${offset}`
-);
-
-function Circle({ from, to }) {
-  const theme = useTheme();
-  const isLarge = useMediaQuery(theme.breakpoints.up("md"));
-  const containerRef = useRef();
-
-  const circleWidth = isLarge ? 8 : 6;
-  const circleOffset = 19;
-  const glowWidth = circleWidth * 2;
-  const glowOffset = circleOffset - (glowWidth - circleWidth) / 2;
-  const blur = isLarge ? 8 : 5;
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const canvas = SVG().addTo(containerRef.current).size("100%", "100%");
-
-    const gradient = new Gradient("linear");
-    gradient.stop(0, from);
-    gradient.stop(1, to);
-    canvas.add(gradient);
-
-    const glow = new Polygon().fill(gradient).css("filter", `blur(${blur}px)`);
-    canvas.add(glow);
-
-    const circle = new Polygon().fill("#ffffff");
-    canvas.add(circle);
-
-    const inner = new SvgCircle()
-      .fill(gradient)
-      .css("filter", `blur(${blur}px)`);
-    canvas.add(inner);
-
-    function draw() {
-      const size = containerRef.current.offsetWidth;
-      const center = size / 2;
-      const offset =
-        parseInt(
-          getComputedStyle(containerRef.current.parentElement).paddingLeft
-        ) - 5;
-
-      const circlePoints = calculateCirclePoints(
-        size,
-        circleWidth,
-        circleOffset
-      );
-      const glowPoints = calculateCirclePoints(size, glowWidth, glowOffset);
-
-      glow.plot(glowPoints);
-      circle.plot(circlePoints);
-
-      inner.radius(center - offset).move(offset, offset);
-    }
-
-    draw();
-
-    const debouncedDraw = debounce(draw, 500);
-    window.addEventListener("resize", debouncedDraw);
-
-    return () => {
-      canvas.remove();
-      window.removeEventListener("resize", debouncedDraw);
-    };
-  }, [circleWidth, circleOffset, glowWidth, glowOffset, blur, from, to]);
-
-  return (
-    <Box
-      className="circle"
-      ref={containerRef}
-      sx={{
-        animation: `${circleAnimation} 2s ease-in-out infinite`,
-        position: "absolute",
-        zIndex: 0,
-        left: 0,
-        top: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-      }}
-    />
   );
 }
 
