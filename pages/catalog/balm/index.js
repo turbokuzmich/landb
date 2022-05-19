@@ -4,9 +4,9 @@ import { withIronSessionSsr } from "iron-session/next";
 import cart from "../../../middleware/cart";
 
 const composition = [
-  "Дезостеарил малат",
   "Масло ши",
   "Масло какао",
+  "Диизостеарил малат",
   "Канделильский воск",
   "Микрокристалический воск",
   "Цетиол ультимэйт",
