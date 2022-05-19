@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
+import Head from "next/head";
 import Box from "@mui/material/Box";
 import Layout from "../../components/layout";
 import Button from "@mui/material/Button";
@@ -70,6 +71,10 @@ export default function Cart(props) {
 
   return (
     <Layout>
+      <Head>
+        <title key="title">LandB — корзина</title>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
+      </Head>
       <Menu selected="/cart" sum={sum} />
       <Container maxWidth="md">
         {idsInCart.length === 0 ? (

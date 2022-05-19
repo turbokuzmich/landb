@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import Head from "next/head";
 import { keyframes } from "@emotion/react";
 import { styled, useTheme } from "@mui/material/styles";
 import Menu from "./menu";
@@ -46,6 +47,10 @@ export default function Item({
 
   return (
     <Layout>
+      <Head>
+        <title key="title">LandB — {subtitles[id]}</title>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
+      </Head>
       <Menu selected="/catalog" sum={sum} cartMenuItemRef={cartMenuItemRef} />
       <ClickAwayListener onClickAway={close}>
         <Popper

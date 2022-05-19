@@ -1,4 +1,5 @@
 import Link from "@mui/material/Link";
+import Head from "next/head";
 import Container from "@mui/material/Container";
 import Layout from "../../components/layout";
 import Typography from "@mui/material/Typography";
@@ -13,6 +14,10 @@ export default function About({ cart }) {
 
   return (
     <Layout>
+      <Head>
+        <title key="title">LandB — контакты</title>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
+      </Head>
       <Menu selected="/contacts" sum={sum} />
       <Container
         sx={{

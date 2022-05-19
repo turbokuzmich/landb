@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useRef, useEffect, useState, useCallback } from "react";
+import Head from "next/head";
 import Box from "@mui/material/Box";
 import Layout from "../../components/layout";
 import Typography from "@mui/material/Typography";
@@ -55,6 +56,10 @@ export default function Catalog({ cart }) {
 
   return (
     <Layout>
+      <Head>
+        <title key="title">LandB — каталог</title>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
+      </Head>
       <Menu selected="/catalog" sum={sum} />
       <Box
         sx={{

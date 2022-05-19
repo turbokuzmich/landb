@@ -257,6 +257,8 @@ export default function Home() {
         `}
       />
       <Head>
+        <title key="title">LandB</title>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
         <link rel="prefetch" href="/images/balm.png" />
         <link rel="preload" href="/images/balm.png" as="image" />
         <link rel="prefetch" href="/images/photo_balm.png" />

@@ -1,3 +1,4 @@
+import Head from "next/head";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Layout from "../../components/layout";
@@ -12,6 +13,10 @@ export default function About({ cart }) {
 
   return (
     <Layout>
+      <Head>
+        <title key="title">LandB — контакты</title>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
+      </Head>
       <Menu selected="/about" sum={sum} />
       <Container
         sx={{
@@ -55,8 +60,8 @@ export default function About({ cart }) {
           &laquo;Продукция&raquo;, не&nbsp;покидая наш сайт.
         </Paragraph>
         <Paragraph>
-          Мы&nbsp;рады знакомству с&nbsp;Вами и&nbsp;надеемся, что наша продукция
-          будет радовать Вас и&nbsp;ваших клиентов.
+          Мы&nbsp;рады знакомству с&nbsp;Вами и&nbsp;надеемся, что наша
+          продукция будет радовать Вас и&nbsp;ваших клиентов.
         </Paragraph>
         <Paragraph>С&nbsp;уважением, команда DeluxSPA.</Paragraph>
       </Container>
