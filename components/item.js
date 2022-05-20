@@ -6,7 +6,8 @@ import A from "@mui/material/Link";
 import Menu from "./menu";
 import Layout from "./layout";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCartCheckout";
+import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -348,6 +349,7 @@ function CartBlock({ id, add, itemStatus, sx = {} }) {
         <Price sum={prices[id]} />
       </Typography>
       <Button
+        startIcon={<ShoppingBasketIcon />}
         onClick={add}
         variant="outlined"
         size="large"

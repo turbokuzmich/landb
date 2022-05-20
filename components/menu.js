@@ -7,7 +7,8 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import CartEmptyIcon from "@mui/icons-material/ShoppingCart";
+import CartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { useRouter } from "next/router";
@@ -143,7 +144,11 @@ export default function LnBMenu({ selected, cartMenuItemRef, sum = 0 }) {
               },
             }}
           >
-            <ShoppingCartIcon sx={{ mr: "6px" }} />
+            {sum > 0 ? (
+              <CartCheckoutIcon sx={{ mr: "6px" }} />
+            ) : (
+              <CartEmptyIcon sx={{ mr: "6px" }} />
+            )}
             <Price sum={sum} />
           </A>
         </Link>
