@@ -12,13 +12,7 @@ const composition = [
 
 export default function Oil({ cart }) {
   return (
-    <Item
-      id="oil"
-      cart={cart}
-      composition={composition}
-      colorStart="#4874ff"
-      colorStop="#ff00ff"
-    >
+    <Item id="oil" cart={cart} composition={composition}>
       Уникальный коктейль органических жирных и&nbsp;эфирных масел высшего
       качества в&nbsp;комплексном уходе за&nbsp;областью бровей и&nbsp;лицом.
       Пластичная структура обусловлена специально подобранным сочетанием

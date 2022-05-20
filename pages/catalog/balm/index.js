@@ -16,13 +16,7 @@ const composition = [
 
 export default function Oil({ cart }) {
   return (
-    <Item
-      id="balm"
-      cart={cart}
-      composition={composition}
-      colorStart="#0642ff"
-      colorStop="#59fca6"
-    >
+    <Item id="balm" cart={cart} composition={composition}>
       Создан по&nbsp;уникальной многоэтапной технологии и&nbsp;имеет лучшие
       органолептические свойства и&nbsp;эффективность. Состоит
       из&nbsp;современных комплексных, сверхэффективных косметических добавок,

@@ -5,8 +5,8 @@ export default function Price({ sum }) {
     <NumberFormat
       value={sum}
       displayType="text"
-      thousandSeparator=" "
-      suffix=" ₽"
+      thousandSeparator=" "
+      suffix=" ₽"
     />
   );
 }

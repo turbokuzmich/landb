@@ -1,7 +1,8 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import Head from "next/head";
-import { keyframes } from "@emotion/react";
 import { styled, useTheme } from "@mui/material/styles";
+import Link from "next/link";
+import A from "@mui/material/Link";
 import Menu from "./menu";
 import Layout from "./layout";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
@@ -13,20 +14,15 @@ import Popper from "@mui/material/Popper";
 import Price from "./price";
 import Box from "@mui/material/Box";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { prices, titles, subtitles } from "../constants";
+import { items, prices, titles, subtitles } from "../constants";
 import useCart from "../hooks/useCart";
 
 const Img = styled("img")``;
 
-export default function Item({
-  id,
-  cart,
-  composition,
-  colorStart,
-  colorStop,
-  children,
-}) {
+export default function Item({ id, cart, composition, children }) {
   const cartMenuItemRef = useRef();
+
+  const auxIds = useMemo(() => items.filter((item) => item !== id), [id]);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -171,7 +167,10 @@ export default function Item({
               xs: "column",
               sm: "row",
             },
-            gap: 8,
+            gap: {
+              xs: 2,
+              md: 8,
+            },
             alignItems: "center",
             maxWidth: 800,
             mb: {
@@ -263,14 +262,73 @@ export default function Item({
               sm: "center",
             },
             maxWidth: 800,
+          }}
+          paragraph
+        >
+          {children}
+        </Typography>
+        <Typography variant="h5" paragraph>
+          А еще у нас есть
+        </Typography>
+        <Box
+          sx={{
+            width: "100%",
+            justifyContent: "center",
+            display: "flex",
+            flexDirection: {
+              xs: "column",
+              md: "row",
+            },
+            gap: {
+              xs: 1,
+              md: 4,
+            },
             mb: {
               xs: 2,
               md: 4,
             },
           }}
         >
-          {children}
-        </Typography>
+          {auxIds.map((id) => (
+            <Link key={id} href={`/catalog/${id}`} passHref>
+              <A
+                underline="none"
+                sx={{
+                  gap: 2,
+                  height: 70,
+                  display: "flex",
+                  "&:hover": {
+                    color: "#ffffff",
+                  },
+                  "&:hover .auxImage": {
+                    filter: "grayscale(0)",
+                  },
+                }}
+              >
+                <Img
+                  className="auxImage"
+                  src={`/images/photo_${id}.png`}
+                  sx={{
+                    height: 70,
+                    filter: "grayscale(0.2)",
+                  }}
+                />
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Typography sx={{ textTransform: "uppercase" }}>
+                    {titles[id]}
+                  </Typography>
+                  <Typography variant="body2">{subtitles[id]}</Typography>
+                </Box>
+              </A>
+            </Link>
+          ))}
+        </Box>
       </Container>
     </Layout>
   );

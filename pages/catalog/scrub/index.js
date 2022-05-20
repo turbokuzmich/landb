@@ -16,13 +16,7 @@ const composition = [
 
 export default function Oil({ cart }) {
   return (
-    <Item
-      id="scrub"
-      cart={cart}
-      composition={composition}
-      colorStart="#59fca6"
-      colorStop="#cc09e0"
-    >
+    <Item id="scrub" cart={cart} composition={composition}>
       Превосходный мелкодисперсный скраб-паста для губ и&nbsp;бровей отлично
       эксфолиирует отмершие частички кожи, а&nbsp;также стимулирует процессы
       регенерации, питает и&nbsp;насыщает микроэлементами и&nbsp;маслами.

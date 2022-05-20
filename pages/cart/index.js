@@ -164,9 +164,9 @@ function CheckoutForm({ sum, updateCart }) {
           display: sum >= 1500 ? "none" : "block",
         }}
       >
-        Стоимость доставки по Москве и МО — <Price sum={150} />. В регионы —{" "}
-        <Price sum={300} />.<br />
-        При заказе от <Price sum={1500} /> доставка бесплатна.
+        Стоимость доставки по Москве и МО — <Price sum={150} />, по территории
+        РФ — <Price sum={300} />.<br />
+        При заказе свыше <Price sum={1500} /> доставим до ПВЗ бесплатно.
       </Typography>
       <Formik
         initialValues={initialFormValues}
