@@ -1,10 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import Head from "next/head";
 import { Global, css, keyframes } from "@emotion/react";
-import { SVG, Polygon } from "@svgdotjs/svg.js";
 import { styled } from "@mui/material/styles";
 import debounce from "lodash/debounce";
-import memoize from "lodash/memoize";
 import Link from "next/link";
 import Box from "@mui/material/Box";
 import A from "@mui/material/Link";
@@ -18,20 +16,11 @@ const circleAnimation = keyframes`
   0% {
     opacity: 0
   }
-  3% {
-    opacity: 0.3
-  }
-  6% {
-    opacity: 0
-  }
-  9% {
-    opacity: 0.6
-  }
-  15% {
-    opacity: 0
+  50% {
+    opacity: 0.5
   }
   100% {
-    opacity: 1
+    opacity: 0
   }
 `;
 
@@ -53,9 +42,9 @@ const logoPosition = {
 };
 const circleRelativeOffsets = {
   left: 77 / 751,
-  top: 40 / 651,
+  top: 41 / 651,
   right: 90 / 751,
-  width: 19 / 751,
+  offset: 102,
 };
 
 const backgroundRatio = backgroundSize.width / backgroundSize.height;
@@ -84,7 +73,7 @@ function getLogoRect(windowSize) {
     const circleLeft = circleRelativeOffsets.left * resizedLogoSize.width;
     const circleTop = circleRelativeOffsets.top * resizedLogoSize.height;
     const circleRight = circleRelativeOffsets.right * resizedLogoSize.width;
-    const circleWidth = circleRelativeOffsets.width * resizedLogoSize.width;
+    const circleOffset = circleRelativeOffsets.offset * resize;
 
     return {
       ...resizedLogoSize,
@@ -92,7 +81,7 @@ function getLogoRect(windowSize) {
       circleLeft,
       circleTop,
       circleRight,
-      circleWidth,
+      circleOffset,
     };
   } else {
     const resize = windowSize.width / backgroundSize.width;
@@ -115,7 +104,7 @@ function getLogoRect(windowSize) {
     const circleLeft = circleRelativeOffsets.left * resizedLogoSize.width;
     const circleTop = circleRelativeOffsets.top * resizedLogoSize.height;
     const circleRight = circleRelativeOffsets.right * resizedLogoSize.width;
-    const circleWidth = circleRelativeOffsets.width * resizedLogoSize.width;
+    const circleOffset = circleRelativeOffsets.offset * resize;
 
     if (resizedLogoPosition.top + resizedLogoSize.height > windowSize.height) {
       resizedLogoSize.height = windowSize.height - resizedLogoPosition.top;
@@ -127,7 +116,7 @@ function getLogoRect(windowSize) {
       circleLeft,
       circleTop,
       circleRight,
-      circleWidth,
+      circleOffset,
     };
   }
 }
@@ -142,51 +131,15 @@ function getJingleRect(windowSize, logoRect) {
   return { width, height, top, left };
 }
 
-const calculateCirclePoints = memoize(
-  (size, width = 8, x = 0, y = 0) => {
-    const pointsCount = 100;
-    const radius = size / 2;
-    const innerRadius = radius - width;
-    const pointAngle = 360 / pointsCount;
-
-    let outerPoints = [];
-    let innerPoints = [];
-
-    for (let i = 0, j = pointsCount; i <= pointsCount; i++, j--) {
-      const outerAngle = (pointAngle * i * Math.PI) / 180;
-      const outerX = radius * Math.sin(outerAngle) + radius + x;
-      const outerY = radius * Math.cos(outerAngle) + radius + y;
-
-      const innerAngle = (pointAngle * j * Math.PI) / 180;
-      const innerX = innerRadius * Math.sin(innerAngle) + radius + x;
-      const innerY = innerRadius * Math.cos(outerAngle) + radius + y;
-
-      outerPoints.push([outerX, outerY]);
-      innerPoints.push([innerX, innerY]);
-    }
-
-    return [...outerPoints, ...innerPoints];
-  },
-  (size, width, x, y) => `${size}-${width}-${x}-${y}`
-);
-
 export default function Home() {
   const logoRef = useRef(null);
   const jingleRef = useRef(null);
-  const circleRef = useRef(null);
+  const shineRef = useRef(null);
   const backgroundRef = useRef(null);
 
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const canvas = SVG().addTo(circleRef.current).size("100%", "100%");
-
-    const shine = new Polygon().fill("#ffffff");
-    canvas.add(shine);
-
-    const circle = new Polygon().fill("#ffffff").css("filter", "blur(8px)");
-    canvas.add(circle);
-
     function drawLogo(logoRect) {
       logoRef.current.style.width = `${logoRect.width}px`;
       logoRef.current.style.height = `${logoRect.height}px`;
@@ -202,16 +155,18 @@ export default function Home() {
     }
 
     function drawCircle(logoRect) {
-      const size = logoRect.width - logoRect.circleLeft - logoRect.circleRight;
-      const points = calculateCirclePoints(
-        size,
-        logoRect.circleWidth,
-        logoRect.circleLeft,
-        logoRect.circleTop
-      );
-
-      circle.plot(points);
-      shine.plot(points);
+      shineRef.current.style.left = `${
+        logoRect.circleLeft - logoRect.circleOffset
+      }px`;
+      shineRef.current.style.top = `${
+        logoRect.circleTop - logoRect.circleOffset
+      }px`;
+      shineRef.current.style.width = `${
+        logoRect.width -
+        logoRect.circleLeft -
+        logoRect.circleRight +
+        logoRect.circleOffset * 2
+      }px`;
     }
 
     function drawBackground(windowSize) {
@@ -242,7 +197,6 @@ export default function Home() {
     window.addEventListener("resize", redraw);
 
     return () => {
-      canvas.remove();
       window.removeEventListener("resize", redraw);
     };
   }, [setVisible]);
@@ -308,12 +262,14 @@ export default function Home() {
               y: 0,
             }}
           >
-            <Box
-              ref={circleRef}
+            <Img
+              src="/images/home_shine.png"
+              ref={shineRef}
               sx={{
-                animation: `${circleAnimation} 2s ease-out 1s forwards`,
+                position: "absolute",
+                userSelect: "none",
+                animation: `${circleAnimation} 3s ease-out 1s infinite`,
                 opacity: 0,
-                height: "100%",
               }}
             />
           </A>
