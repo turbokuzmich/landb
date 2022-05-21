@@ -17,7 +17,7 @@ const circleAnimation = keyframes`
     opacity: 0
   }
   50% {
-    opacity: 0.5
+    opacity: 1
   }
   100% {
     opacity: 0

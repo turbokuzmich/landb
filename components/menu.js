@@ -14,6 +14,7 @@ import { useTheme } from "@mui/material/styles";
 import { useRouter } from "next/router";
 
 const items = [
+  { title: "Главная", link: "/" },
   { title: "Продукция", link: "/catalog" },
   { title: "О нас", link: "/about" },
   { title: "Контакты", link: "/contacts" },

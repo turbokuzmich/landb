@@ -269,7 +269,7 @@ export default function Item({ id, cart, composition, children }) {
           {children}
         </Typography>
         <Typography variant="h5" paragraph>
-          А еще у нас есть
+          Обратите внимание
         </Typography>
         <Box
           sx={{
