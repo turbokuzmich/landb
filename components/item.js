@@ -214,6 +214,9 @@ export default function Item({ id, cart, composition, children }) {
               }}
             />
             <Typography variant="h6" paragraph>
+              Вес — 14 г
+            </Typography>
+            <Typography variant="h6" paragraph>
               Состав:
             </Typography>
             <Typography
@@ -262,9 +265,9 @@ export default function Item({ id, cart, composition, children }) {
               xs: "left",
               sm: "center",
             },
+            mb: 4,
             maxWidth: 800,
           }}
-          paragraph
         >
           {children}
         </Typography>
